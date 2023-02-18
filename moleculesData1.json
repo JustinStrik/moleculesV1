@@ -1,7 +1,4 @@
 [{
-  "_id": {
-    "$oid": "63ef94147a8cb1d6419d7d4b"
-  },
   "name": "Methane",
   "identifier": "Methane_004",
   "Job_stat": "S",
@@ -42,9 +39,6 @@
   "RMSD": 0,
   "RMSF": 0
 },{
-  "_id": {
-    "$oid": "63ef94237a8cb1d6419d7d4d"
-  },
   "name": "Ethanol",
   "identifier": "Ethanol_005",
   "Job_stat": "S",
@@ -89,9 +83,6 @@
   "RMSD": 0,
   "RMSF": 0
 },{
-  "_id": {
-    "$oid": "63ef94ed7a8cb1d6419d7d4f"
-  },
   "name": "Caffeine",
   "identifier": "Caffeine_003",
   "Job_stat": "S",
