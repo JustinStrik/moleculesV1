@@ -1,0 +1,133 @@
+[{
+  "name": "Methane",
+  "identifier": "Methane_004",
+  "Job_stat": "S",
+  "basis_sets": "6-31G",
+  "functional": "B3LYP",
+  "spin_multi": 1,
+  "total_chg": 0,
+  "stoichiometry": "CH4",
+  "S2": 0,
+  "time": "12:05:32",
+  "Nproc": 4,
+  "E_HF": -39.72662,
+  "HOMO": -0.29341,
+  "LUMO": 0.15811,
+  "HOMO_LUMO_gap": 0.45152,
+  "Mulliken": {
+    "C": -0.12657,
+    "H": 0.03164
+  },
+  "Hirshfeld": {
+    "C": -0.10722,
+    "H": 0.02304
+  },
+  "CM5": {
+    "C": -0.11029,
+    "H": 0.01302
+  },
+  "NBO_charge": {
+    "C": -0.14069,
+    "H": 0.03518
+  },
+  "Dip_tot": 0.01406,
+  "Dip_x": -0.00388,
+  "Dip_y": 0.00594,
+  "Dip_z": 0.01141,
+  "Ini_geo": "methane.xyz",
+  "Opt_geo": "methane_optimized.xyz",
+  "RMSD": 0,
+  "RMSF": 0
+},{
+  "name": "Ethanol",
+  "identifier": "Ethanol_005",
+  "Job_stat": "S",
+  "basis_sets": "6-31G",
+  "functional": "B3LYP",
+  "spin_multi": 1,
+  "total_chg": 0,
+  "stoichiometry": "C2H6O",
+  "S2": 0,
+  "time": "16:33:10",
+  "Nproc": 8,
+  "E_HF": -154.53251,
+  "HOMO": -0.29117,
+  "LUMO": 0.16633,
+  "HOMO_LUMO_gap": 0.4575,
+  "Mulliken": {
+    "C": -0.21671,
+    "O": -0.30898,
+    "H": 0.08648
+  },
+  "Hirshfeld": {
+    "C": -0.18967,
+    "O": -0.29663,
+    "H": 0.04562
+  },
+  "CM5": {
+    "C": -0.19622,
+    "O": -0.30062,
+    "H": 0.02909
+  },
+  "NBO_charge": {
+    "C": -0.25309,
+    "O": -0.36258,
+    "H": 0.07934
+  },
+  "Dip_tot": 1.73475,
+  "Dip_x": -0.32189,
+  "Dip_y": 0.80354,
+  "Dip_z": 0.17634,
+  "Ini_geo": "ethanol.xyz",
+  "Opt_geo": "ethanol_optimized.xyz",
+  "RMSD": 0,
+  "RMSF": 0
+},{
+  "name": "Caffeine",
+  "identifier": "Caffeine_003",
+  "Job_stat": "S",
+  "basis_sets": "6-311++G(d,p)",
+  "functional": "M06-2X",
+  "spin_multi": 1,
+  "total_chg": 0,
+  "stoichiometry": "C8H10N4O2",
+  "S2": 0,
+  "time": "09:15:52",
+  "Nproc": 16,
+  "E_HF": -1542.0263,
+  "HOMO": -0.26149,
+  "LUMO": 0.05653,
+  "HOMO_LUMO_gap": 0.31802,
+  "Mulliken": {
+    "C": -0.16917,
+    "N": -0.21808,
+    "O": -0.35614,
+    "H": 0.05801
+  },
+  "Hirshfeld": {
+    "C": -0.15236,
+    "N": -0.19939,
+    "O": -0.31958,
+    "H": 0.04122
+  },
+  "CM5": {
+    "C": -0.16019,
+    "N": -0.20793,
+    "O": -0.31946,
+    "H": 0.03209
+  },
+  "NBO_charge": {
+    "C": -0.22074,
+    "N": -0.27967,
+    "O": -0.42698,
+    "H": 0.06486
+  },
+  "Dip_tot": 1.70039,
+  "Dip_x": -0.14907,
+  "Dip_y": -0.06149,
+  "Dip_z": -1.66917,
+  "Ini_geo": "caffeine.xyz",
+  "Opt_geo": "caffeine_optimized.xyz",
+  "RMSD": 0,
+  "RMSF": 0
+}]
