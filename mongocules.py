@@ -18,6 +18,48 @@ class Status(Enum):
 db = cluster["moleculesTestV1"]
 collection = db["molecules"]
 
+def show_identifiers(data):
+    # Create the popup window
+    popup = tk.Toplevel()
+    popup.title("Identifiers")
+
+    # Add a label to the window
+    label = tk.Label(popup, text="These are the identifiers in the file:")
+    label.grid(row=0, column=0, columnspan=2)
+
+    # Add a button to close the window
+    button_close = tk.Button(popup, text="Close", command=popup.destroy)
+    button_close.grid(row=len(data)+3, column=1, columnspan=2)
+
+
+    # Display the identifiers in rows
+    for index, molecule in enumerate(data):
+        identifier = f'{molecule["name"]}_{molecule["basis_sets"]}_{molecule["functional"]}'
+        label = tk.Label(popup, text=identifier)
+        label.grid(row=index+2, column=0)
+        button_override = tk.Button(popup, text="Override", command=popup.destroy)
+        button_remove = tk.Button(popup, text="Remove", command=popup.destroy)
+        button_override.grid(row=index+2, column=1)
+        button_remove.grid(row=index+2, column=2)
+
+
+    # Make the popup window modal
+    popup.grab_set()
+    popup.geometry("800x600")
+    popup.mainloop()
+
+
+def toggle_color(row_frame):
+    bg_color = row_frame.cget("bg")
+    if bg_color == "red":
+        row_frame.configure(bg="green")
+        row_frame.winfo_children()[0].configure(bg="green", fg="white")
+        row_frame.winfo_children()[1].configure(bg="green")
+    else:
+        row_frame.configure(bg="red")
+        row_frame.winfo_children()[0].configure(bg="red", fg="white")
+        row_frame.winfo_children()[1].configure(bg="red")
+
 
 def upload_file():
     # Open a GUI window to browse for a file
@@ -36,9 +78,8 @@ def upload_file():
             messagebox.showerror("Error", "Selected file is not a valid JSON file.")
             return
 
-    conflicts = []
-    warnings = []
-    safe = []
+    # Show the identifiers in a pop-up window
+    show_identifiers(data)
 
     # Check if db has a document with the same identifier
     # If it does, ask the user if they want to override it
@@ -50,30 +91,23 @@ def upload_file():
         existing_doc = collection.find_one({"identifier": doc_id})
 
         if existing_doc:
-            # If the document exists, add it to the conflicts list
-            conflicts.append((doc_id, molecule))
-        elif collection.find_one({"name": molecule["name"], "basis_sets": molecule["basis_sets"], "functional": molecule["functional"]}):
-            # If there is a molecule with the same name, basis_sets, and functional in the database, add it to the warnings list
-            warnings.append((doc_id, molecule))
+            # If the document exists, ask the user if they want to keep the original or override
+            confirm_override = messagebox.askyesno("Document already exists", f"A document with identifier {doc_id} already exists in the database. Do you want to override it?")
+
+            if confirm_override:
+                # If the user confirmed the override, update the existing document with the new information
+                collection.update_one({"_id": existing_doc["_id"]}, {"$set": molecule})
+                messagebox.showinfo("Success", f"The document with identifier {doc_id} has been updated.")
+            else:
+                # If the user did not confirm the override, do nothing
+                return
+
         else:
-            # If the document does not exist, insert it into the database and add it to the safe list
+            print(doc_id)
+            # If the document does not exist, insert it into the database
             molecule["identifier"] = doc_id
             collection.insert_one(molecule)
-            safe.append((doc_id, molecule))
-
-    # Show the results in message boxes
-    if conflicts:
-        conflict_message = "\n".join([f"{molecule[0]} - {Status.Conflicts.value}" for molecule in conflicts])
-        messagebox.showwarning("Conflicts", f"The following molecules already exist in the database:\n{conflict_message}")
-
-    if warnings:
-        warning_message = "\n".join([f"{molecule[0]} - {Status.Warning.value}" for molecule in warnings])
-        messagebox.showwarning("Warnings", f"The following molecules have the same name, basis sets, and functional as molecules in the database:\n{warning_message}")
-
-    if safe:
-        safe_message = "\n".join([f"{molecule[0]} - {Status.Success.value}" for molecule in safe])
-        messagebox.showinfo("Success", f"The following molecules have been added to the database:\n{safe_message}")
-
+            messagebox.showinfo("Success", f"The document with identifier {doc_id} has been added to the database.")
 
 if __name__ == "__main__":
     upload_file()
