@@ -1,12 +1,18 @@
 import tkinter as tk
 from tkinter import filedialog
 import json
+from enum import Enum
 import pymongo
 from pymongo import MongoClient
 from tkinter import messagebox
 
 # Connect to the MongoDB, change the connection string per your MongoDB environment
 cluster = MongoClient("mongodb+srv://jstrik:strik@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority")
+
+class Status(Enum):
+    Conflicts = 'conflicts'
+    Warning = 'warning'
+    Success = 'success'
 
 # Connect to the database
 db = cluster["moleculesTestV1"]
@@ -30,30 +36,43 @@ def upload_file():
             messagebox.showerror("Error", "Selected file is not a valid JSON file.")
             return
 
-    print(data[0]["name"])
+    conflicts = []
+    warnings = []
+    safe = []
 
-    # Check if the identifier already exists in the database
-    doc_id = f'{data[0]["name"]}_{data[0]["basis_sets"]}_{data[0]["functional"]}'
-    existing_doc = collection.find_one({"identifier": doc_id})
+    # Check if db has a document with the same identifier
+    # If it does, ask the user if they want to override it
+    # If they do, update the document
 
-    if existing_doc:
-        # If the document exists, ask the user if they want to keep the original or override
-        confirm_override = messagebox.askyesno("Document already exists", f"A document with identifier {doc_id} already exists in the database. Do you want to override it?")
+    for molecule in data:
+        # Check if the identifier already exists in the database
+        doc_id = f'{molecule["name"]}_{molecule["basis_sets"]}_{molecule["functional"]}'
+        existing_doc = collection.find_one({"identifier": doc_id})
 
-        if confirm_override:
-            # If the user confirmed the override, update the existing document with the new information
-            collection.update_one({"_id": existing_doc["_id"]}, {"$set": data})
-            messagebox.showinfo("Success", f"The document with identifier {doc_id} has been updated.")
+        if existing_doc:
+            # If the document exists, add it to the conflicts list
+            conflicts.append((doc_id, molecule))
+        elif collection.find_one({"name": molecule["name"], "basis_sets": molecule["basis_sets"], "functional": molecule["functional"]}):
+            # If there is a molecule with the same name, basis_sets, and functional in the database, add it to the warnings list
+            warnings.append((doc_id, molecule))
         else:
-            # If the user did not confirm the override, do nothing
-            return
+            # If the document does not exist, insert it into the database and add it to the safe list
+            molecule["identifier"] = doc_id
+            collection.insert_one(molecule)
+            safe.append((doc_id, molecule))
 
-    else:
-        print(doc_id)
-        # If the document does not exist, insert it into the database
-        data["identifier"] = doc_id
-        collection.insert_one(data)
-        messagebox.showinfo("Success", f"The document with identifier {doc_id} has been added to the database.")
+    # Show the results in message boxes
+    if conflicts:
+        conflict_message = "\n".join([f"{molecule[0]} - {Status.Conflicts.value}" for molecule in conflicts])
+        messagebox.showwarning("Conflicts", f"The following molecules already exist in the database:\n{conflict_message}")
+
+    if warnings:
+        warning_message = "\n".join([f"{molecule[0]} - {Status.Warning.value}" for molecule in warnings])
+        messagebox.showwarning("Warnings", f"The following molecules have the same name, basis sets, and functional as molecules in the database:\n{warning_message}")
+
+    if safe:
+        safe_message = "\n".join([f"{molecule[0]} - {Status.Success.value}" for molecule in safe])
+        messagebox.showinfo("Success", f"The following molecules have been added to the database:\n{safe_message}")
 
 
 if __name__ == "__main__":
