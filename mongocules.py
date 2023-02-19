@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import filedialog
 import json
@@ -7,8 +8,48 @@ from pymongo import MongoClient
 from tkinter import messagebox
 import dbFunctions
 
-# Connect to the MongoDB, change the connection string per your MongoDB environment
-cluster = MongoClient("mongodb+srv://jstrik:strik@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority")
+# if the user file does not exist (they have never logged in before), create it
+# file should just contain variables username and password
+# create a gui to ask for the username and password
+def create_user_file():
+    create_user_window = tk.Tk()
+    create_user_window.title("Create user file")
+    create_user_window.geometry("300x200")
+
+    # create a label and entry for the username
+    username_label = tk.Label(create_user_window, text="Username")
+    username_label.pack()
+    username_entry = tk.Entry(create_user_window)
+    username_entry.pack()
+
+    # create a label and entry for the password
+    password_label = tk.Label(create_user_window, text="Password")
+    password_label.pack()
+    password_entry = tk.Entry(create_user_window)
+    password_entry.pack()
+
+    # create a button to create the file
+    create_button = tk.Button(create_user_window, text="Create file", command=lambda: create_file(username_entry.get(), password_entry.get()))
+    create_button.pack()
+
+    # create a button to close the window
+    close_button = tk.Button(create_user_window, text="Close", command=create_user_window.destroy)
+    close_button.pack()
+
+    create_user_window.mainloop()
+
+def create_file(username, password):
+    # create the file
+    with open("user.py", "w") as file:
+        file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"".format(username=username, password=password))
+
+# if the user.py file does not exist, create it
+if not os.path.exists("user.py"):
+    create_user_file()
+from user import username, password
+
+print("mongodb+srv://{username}:{password}@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password))
+cluster = MongoClient("mongodb+srv://{username}:{password}@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password))
 
 class Status(Enum):
     CONFLICT = 'conflict' # item is already in the database, but with the same properties (requires override)
@@ -23,6 +64,11 @@ collection = db["moleculesTesting1"]
 
 # Create a list of labels for the identPopup window
 labels = []
+statuses = []
+
+def deleteEverything():
+    # clear the database
+    return collection.delete_many({})
 
 def push_to_db(molecule, statuses, row):
     collection.insert_one(molecule[0])
@@ -157,10 +203,9 @@ def upload_file(data):
             collection.insert_one(molecule)
             statuses.append((molecule, Status.SUCCESS))
 
-    # return statuses
+    return statuses
 
 if __name__ == "__main__":
-    statuses = []
     
     # Create the main window
     root = tk.Tk()

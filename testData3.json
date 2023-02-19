@@ -1,0 +1,41 @@
+[
+    {
+        "name": "Molecule 1",
+        "formula": "C6H12O6",
+        "molar_mass": 180.156,
+        "basis_sets": "2",
+        "functional": "2",
+        "description": "Glucose is a simple sugar and an important energy source in living organisms.",
+        "structure": "https://example.com/mol-1.png",
+        "test": true
+    },
+    {
+        "_name": "Molecule 2",
+        "_formula": "C27H46O",
+        "_molar_mass": 390.654,
+        "basis_sets": "3",
+        "functional": "4",
+        "_structure": "https://example.com/mol-2.png",
+        "test": true
+    },
+    {
+        "name": "Molecule 3",
+        "formula": "C10H14N2O",
+        "basis_sets": "5",
+        "functional": "6",
+        "molar_mass": 190.233,
+        "description": "Caffeine is a central nervous system stimulant and the world's most widely consumed psychoactive drug.",
+        "structure": "https://example.com/mol-3.png",
+        "test": true
+    },
+    {
+        "name": "Molecule 4",
+        "formula": "C700",
+        "molar_mass": 140,
+        "basis_sets": "7",
+        "functional": "8",
+        "description": "Glucose is a simple sugar and an important energy source in living organisms.",
+        "structure": "https://example.com/mol-4.png",
+        "test": true
+    }
+]
