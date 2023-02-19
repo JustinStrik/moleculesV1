@@ -6,7 +6,6 @@ from enum import Enum
 import pymongo
 from pymongo import MongoClient
 from tkinter import messagebox
-import dbFunctions
 
 # if the user file does not exist (they have never logged in before), create it
 # file should just contain variables username and password
@@ -100,9 +99,7 @@ def on_close():
 
 def show_identifiers(statuses):
     # Create the identPopup window
-    identPopupRoot = tk.Tk()
-    identPopupRoot.withdraw()
-    identPopup = tk.Toplevel(identPopupRoot)
+    identPopup = tk.Tk()
 
     # what follows is a line of code that will hide the window that says tk
     identPopup.title("Identifiers")
@@ -112,7 +109,7 @@ def show_identifiers(statuses):
     label.grid(row=0, column=0, columnspan=2)
 
     # Add a button to close the window
-    button_close = tk.Button(identPopup, text="Close", command=identPopupRoot.destroy)
+    button_close = tk.Button(identPopup, text="Close", command=identPopup.destroy)
     button_close.grid(row=len(statuses)+3, column=1, columnspan=2)
 
     # Display the identifiers in rows
@@ -206,19 +203,15 @@ def upload_file(data):
     return statuses
 
 if __name__ == "__main__":
-    
-    # Create the main window
-    root = tk.Tk()
-    root.withdraw()
 
     # Define the actionPopup window
-    actionPopup = tk.Toplevel(root)
+    actionPopup = tk.Tk() 
     actionPopup.title("Choose an action")
 
     # Create the buttons
     upload_button = tk.Button(actionPopup, text="Upload", command=choose_file) # upload_file(choose_file())
     retrieve_button = tk.Button(actionPopup, text="Retrieve", command=on_retrieve)
-    close_button = tk.Button(actionPopup, text="Close", command=root.destroy)
+    close_button = tk.Button(actionPopup, text="Close", command=actionPopup.destroy)
 
     # Add the buttons to the actionPopup window
     upload_button.pack(pady=5)
