@@ -6,6 +6,7 @@ from enum import Enum
 import pymongo
 from pymongo import MongoClient
 from tkinter import messagebox
+import functools
 
 # if the user file does not exist (they have never logged in before), create it
 # file should just contain variables username and password
@@ -69,6 +70,10 @@ def deleteEverything():
     # clear the database
     return collection.delete_many({})
 
+# needed to make this so that the function ran with the parameters from when the button was instantiated
+def make_override_callback(molecule, statuses, row):
+    return lambda: push_to_db(molecule, statuses, row)
+
 def push_to_db(molecule, statuses, row):
     collection.insert_one(molecule[0])
     index = statuses.index(molecule)  # get the index of the molecule in the statuses list
@@ -76,15 +81,19 @@ def push_to_db(molecule, statuses, row):
     statuses[index] = new_molecule  # replace the old tuple with the new one
     labels[row].config(bg='green')
 
+def make_abort_callback(molecule, statuses):
+    return lambda: abort_upload(molecule, statuses)
+
 def abort_upload(molecule, statuses):
     index = statuses.index(molecule)  # get the index of the molecule in the statuses list
+    labels[index].config(bg='light grey')
     new_molecule = (molecule[0], Status.ABORTED)  # create a new tuple with the updated status
     statuses[index] = new_molecule  # replace the old tuple with the new one
 
 # BOTH FUNCTIONS BELOW ARE NOT USED IN THE CURRENT VERSION OF THE PROGRAM
 def on_retrieve():
     # create a new window to show the retrieved content
-    retrieve_window = tk.Toplevel(root)
+    retrieve_window = tk.Tk()
     retrieve_window.title("Retrieved Content")
     
     # insert the content into a text widget
@@ -120,14 +129,14 @@ def show_identifiers(statuses):
         label.grid(row=row+2, column=0)
 
         if molecule[1] == Status.CONFLICT: # if the status is conflict, add an override button which will remove the document from the database and add the new one
-            button_override = tk.Button(identPopup, text="Override", command=push_to_db(molecule, statuses, row))
-            button_remove = tk.Button(identPopup, text="Remove", command=identPopup.destroy)
+            button_override = tk.Button(identPopup, text="Override", command=make_override_callback(molecule, statuses, row))
+            button_abort = tk.Button(identPopup, text="Abort", command=make_abort_callback(molecule, statuses))
             button_override.grid(row=row+2, column=1)
-            button_remove.grid(row=row+2, column=2)
+            button_abort.grid(row=row+2, column=2)
         elif molecule[1] == Status.WARNING: # if the status is warning, add an abort button which will not add the document to the database
-            button_override = tk.Button(identPopup, text="Abort", command=abort_upload(molecule, statuses))
+            button_abort = tk.Button(identPopup, text="Abort", command=make_abort_callback(molecule, statuses))
             button_remove = tk.Button(identPopup, text="Remove", command=identPopup.destroy)
-            button_override.grid(row=row+2, column=1)
+            button_abort.grid(row=row+2, column=1)
             button_remove.grid(row=row+2, column=2)
         # elif molecule[1] == Status.SUCCESS: # if the status is success, no buttons are needed
 
@@ -144,14 +153,12 @@ def show_identifiers(statuses):
 
 
     # Make the identPopup window modal
-    identPopup.grab_set()
     identPopup.geometry("800x600")
     identPopup.mainloop()
 
 def choose_file():
     # Open a GUI window to browse for a file
-    chooseRoot = tk.Tk()
-    chooseRoot.withdraw()
+
     file_path = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
 
     # If the user canceled the file selection, do nothing
@@ -165,10 +172,7 @@ def choose_file():
             messagebox.showerror("Error", "Selected file is not a valid JSON file.")
             return
         
-    upload_file(data)
-    chooseRoot.destroy()
-    print("Choose File finished")
-    
+    upload_file(data)    
 
 def upload_file(data):
 
@@ -200,6 +204,7 @@ def upload_file(data):
             collection.insert_one(molecule)
             statuses.append((molecule, Status.SUCCESS))
 
+    show_identifiers(statuses)
     return statuses
 
 if __name__ == "__main__":
@@ -222,9 +227,3 @@ if __name__ == "__main__":
     actionPopup.grab_set()
     actionPopup.geometry("800x600")
     actionPopup.mainloop()
-
-    # instantiate statuses array, will be stored as array of pairs (molecule, status)
-    # statuses = upload_file()
-
-    # Show the identifiers in a pop-up window
-    show_identifiers(statuses)
