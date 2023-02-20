@@ -1,3 +1,4 @@
+import datetime
 import os
 import tkinter as tk
 from tkinter import filedialog
@@ -201,6 +202,8 @@ def upload_file(data):
         else:
             # If the document does not exist, insert it into the database
             molecule["identifier"] = doc_id
+            molecule["date"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            molecule["uploaded_by"] = username
             collection.insert_one(molecule)
             statuses.append((molecule, Status.SUCCESS))
 
