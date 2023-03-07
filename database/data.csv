@@ -1,0 +1,4 @@
+Name,status, time, NPROC, HOMO, LUMO, GAP,Electronic energy, Dipole xyz, Dipole,basis sets, functional,stoichiometry,spin multiplicity, S2, total charge, Mulliken, NBO
+14mr_N2_1,S,5:12:10.3,16,-0.19396,-0.07194,0.12202,-2623.6082922,6.613e-09,2.797e-05,0.0000274,0.0000004,-0.6656636,0.6656636,RB3LYP,6-31G(d),C24H12Fe1N8,1,null,0,1.158823,0.8015, 
+gy2_Co2_C,S,17:12:22.3,16,-0.15932,-0.10491,0.05441,-3915.264138,2.794e-09,7.146e-06,-0.1877368,0.1083899,0.,0.2167798,RB3LYP,6-31G(d),C30H12Co2,1,null,0,0.273081,null,
+gy2_Co3_C,F,0:0:13.5,16,
