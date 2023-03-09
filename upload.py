@@ -8,14 +8,17 @@ from getData import get_data
 # # test to see if a simply function from pymongo works
 # client = MongoClient('localhost', 27017)
 
-def create_user_file(username, password, name_of_user):
-    # create the file
-    with open("user.py", "w") as file:
-        file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
+# def create_user_file():
+#     # create the file
+#     username = input("Enter username: ")
+#     password = input("Enter password: ")
+#     name_of_user = input("Enter name of user: ")
+#     with open("user.py", "w") as file:
+#         file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
 
-if not os.path.exists("user.py"):
-    create_user_file()
-from user import username, password, name_of_user
+# if not os.path.exists("user.py"):
+#     create_user_file()
+# from user import username, password, name_of_user
 
 
 client = pymongo.MongoClient()
@@ -40,9 +43,14 @@ if (len(sys.argv) > 1):
     path = sys.argv[1]
 else:
     print("No path given")
-    path = input("Enter path: ")
+    path = input("Enter path (or . for current directory): ")
 
-if os.path.isdir(path):
+if path == '.': 
+    path = os.getcwd()
+    for file in os.listdir(path):
+        if file.endswith(".log"):
+            logfiles.append(file)
+elif os.path.isdir(path):
     for file in os.listdir(path):
         if file.endswith(".log"):
             logfiles.append(file)
@@ -61,5 +69,7 @@ molecules = get_data(logfiles)
 # insert the data into the database
 for mol in molecules:
     mol = mol.__dict__
-    mol['user'] = name_of_user
-    collection.insert_one(mol)
+    ret_val = collection.insert_one(mol)
+    if ret_val.acknowledged:
+        print("Successfully inserted molecule: {name}".format(name=mol['name']))
+
