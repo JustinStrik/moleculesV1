@@ -3,9 +3,7 @@ import os
 from molecule import molecule
 # global logfile
 logfile = ''
-lines = ''
 molecules = []
-current_mol = ''
 # there is a data_lines string
 # this contains the lines with the main data we are concerned with
 # reduces the number of times we have to loop over the file
@@ -69,7 +67,7 @@ def get_basis_set():
     # no 'e' (exponent) should be in the basis set
     current_mol.basis_sets = float(data_lines.split('Dipole=')[1].split(',')[0])
     current_mol.functional = float(data_lines.split('Dipole=')[1].split(',')[1])
-    current_mol.stoichiometry = float(data_lines.split('Dipole=')[1].split(',')[2])
+    current_mol.stoichiometry = float(data_lines.split('Dipole=')[1].split(',')[2].split('\\')[0]) # cut off before //
 
 def get_data_lines():
     # data lines start with '1\1\ and end with @, so read all lines between those two
@@ -94,9 +92,12 @@ def get_data(logfiles):
 
     # loop over all log files
     for logfile in logfiles:
+        global current_mol
         current_mol = molecule()
+
         with open(logfile, 'r') as logfile:
             # Read all lines from the file
+            global lines
             lines = logfile.readlines()
             dataLines = ''
             get_data_lines()
@@ -107,6 +108,7 @@ def get_data(logfiles):
             get_status()
             if current_mol.status == 'Error':
                 # if there was an error, skip the rest of the file
+                molecules.append(current_mol)
                 continue
 
             get_homo_lumo()
@@ -120,6 +122,7 @@ def get_data(logfiles):
 
     # print molecules
     for mol in molecules:
-        print(mol)
+        # print all the data for each molecule
+        print(mol.name, mol.status, mol.HOMO, mol.LUMO, mol.GAP, mol.NPROC, mol.electronic_energy, mol.dipole_xyz, mol.dipole, mol.basis_sets, mol.functional, mol.stoichiometry, sep=', ')
 
-    
+    return molecules
