@@ -58,9 +58,6 @@ logfiles = [os.path.join(path, f) for f in logfiles]
 
 molecules = get_data(logfiles)
 
-# put a random thing in the database to see if it works
-collection.insert_one({"name": "test", "user": "test"})
-
 # insert the data into the database
 for mol in molecules:
     mol = mol.__dict__
