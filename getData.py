@@ -123,10 +123,6 @@ def get_data(logfiles):
             # add the molecule to the list of molecules
             molecules.append(current_mol)
 
-    # print molecules
-    for mol in molecules:
-        print(mol)
-
     return molecules
 
     
