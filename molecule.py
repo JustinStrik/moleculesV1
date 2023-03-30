@@ -4,13 +4,17 @@
 class molecule:
     name = ""
     status = ""
-    time = ""
+    upload_date = ""
+    upload_time = ""
+    cpu_time = ""
+    elapsed_time = ""
     NPROC = ""
     HOMO = 0
     LUMO = 0
     GAP = 0
     electronic_energy = 0
     dipole_xyz = ""
+    opt_xyz = []
     dipole = 0
     basis_sets = ""
     functional = ""

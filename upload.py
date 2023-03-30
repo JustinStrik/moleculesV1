@@ -69,6 +69,9 @@ molecules = get_data(logfiles)
 # insert the data into the database
 for mol in molecules:
     mol = mol.__dict__
+    if mol['status'] != 'Error':
+        mol['identifier'] = f'{mol["name"]}_{mol["basis_sets"]}_{mol["functional"]}'
+
     ret_val = collection.insert_one(mol)
     if ret_val.acknowledged:
         print("Successfully inserted molecule: {name}".format(name=mol['name']))
