@@ -3,16 +3,19 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 import json
+import csv
 from enum import Enum
 import pymongo
 from pymongo import MongoClient
 from tkinter import messagebox
 import functools
 
+# to override, pull from db and update data by adding properties
+
 # if the user file does not exist (they have never logged in before), create it
 # file should just contain variables username and password
 # create a gui to ask for the username and password
-def create_user_file():
+def get_user_info():
     create_user_window = tk.Tk()
     create_user_window.title("Create user file")
     create_user_window.geometry("300x200")
@@ -29,8 +32,13 @@ def create_user_file():
     password_entry = tk.Entry(create_user_window)
     password_entry.pack()
 
+    name_of_user_label = tk.Label(create_user_window, text="Name of user")
+    name_of_user_label.pack()
+    name_of_user_entry = tk.Entry(create_user_window)
+    name_of_user_entry.pack()
+
     # create a button to create the file
-    create_button = tk.Button(create_user_window, text="Create file", command=lambda: create_file(username_entry.get(), password_entry.get()))
+    create_button = tk.Button(create_user_window, text="Create file", command=lambda: create_user_file(username_entry.get(), password_entry.get(), name_of_user_entry.get()))
     create_button.pack()
 
     # create a button to close the window
@@ -39,15 +47,15 @@ def create_user_file():
 
     create_user_window.mainloop()
 
-def create_file(username, password):
+def create_user_file(username, password, name_of_user):
     # create the file
     with open("user.py", "w") as file:
-        file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"".format(username=username, password=password))
+        file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
 
 # if the user.py file does not exist, create it
 if not os.path.exists("user.py"):
-    create_user_file()
-from user import username, password
+    get_user_info()
+from user import username, password, name_of_user
 
 print("mongodb+srv://{username}:{password}@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password))
 cluster = MongoClient("mongodb+srv://{username}:{password}@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password))
@@ -66,6 +74,12 @@ collection = db["moleculesTesting1"]
 # Create a list of labels for the identPopup window
 labels = []
 statuses = []
+
+# query to find  documents in the database and make it accessible to the rest of the program
+query = {}
+query_entry = ''
+query_response = ''
+response_text_widget = '' # will be initialized later as a widget
 
 def deleteEverything():
     # clear the database
@@ -91,17 +105,52 @@ def abort_upload(molecule, statuses):
     new_molecule = (molecule[0], Status.ABORTED)  # create a new tuple with the updated status
     statuses[index] = new_molecule  # replace the old tuple with the new one
 
-# BOTH FUNCTIONS BELOW ARE NOT USED IN THE CURRENT VERSION OF THE PROGRAM
+def query_db(query_entry) -> dict:
+    # convert the query string into a dictionary
+
+    # query string format: key1:value1,key2:value2,key3:value3
+    query = {}
+    for item in query_entry.split(","):
+        key, value = item.split(":")
+        query[key] = value
+
+    # return the query from the mongo database
+    query_response = collection.find(query)
+    for x in query_response:
+        print(x)
+    update_response_text_widget()
+
 def on_retrieve():
     # create a new window to show the retrieved content
     retrieve_window = tk.Tk()
     retrieve_window.title("Retrieved Content")
     
     # insert the content into a text widget
-    content = "Some content that was retrieved from the database."
-    text_widget = tk.Text(retrieve_window)
-    text_widget.insert(tk.END, content)
-    text_widget.pack()
+    query_response = "Some content that was retrieved from the database."
+
+    # for the response from the database
+    response_text_widget = tk.Text(retrieve_window)
+    response_text_widget.insert(tk.END, query_response)
+    response_text_widget.pack()
+
+    # add an entry for the user to enter a query
+    query_entry = tk.Entry(retrieve_window)
+    query_entry.pack()
+
+    # add a button to retrieve the content
+    retrieve_button = tk.Button(retrieve_window, text="Retrieve", command=lambda:query_db(query_entry.get()))
+    retrieve_button.pack()
+
+    # once query is entered, disyplay the content in the text widget
+    # text_widget.insert(tk.END, content)
+
+    retrieve_window.mainloop()
+
+
+def update_response_text_widget():
+    # update the response text widget with the query response
+    response_text_widget.delete(1.0, tk.END)
+    response_text_widget.insert(tk.END, query_response)
 
 def on_close():
     # close the popup window
@@ -170,7 +219,7 @@ def choose_file():
         try:
             data = json.load(f)
         except json.JSONDecodeError:
-            messagebox.showerror("Error", "Selected file is not a valid JSON file.")
+            messagebox.showerror("Error", "Selected file is not a valid JSON or CSV file.")
             return
         
     upload_file(data)    
@@ -203,7 +252,7 @@ def upload_file(data):
             # If the document does not exist, insert it into the database
             molecule["identifier"] = doc_id
             molecule["date"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            molecule["uploaded_by"] = username
+            molecule["uploaded_by"] = name_of_user
             collection.insert_one(molecule)
             statuses.append((molecule, Status.SUCCESS))
 

@@ -1,0 +1,9 @@
+.
+├── 14mr_N2_1.log   //NBO charge output
+├── gy2_Co2_C2.log  //regular output (mulliken charge)
+├── gy2_Co3_C.log   //failed job output
+└── Readme
+
+0 directories, 4 files
+Data format:
+Name,status, time, NPROC, HOMO, LUMO, GAP,Electronic energy, Dipole xyz, Dipole,basis sets, functional,stoichiometry,spin multiplicity, S2, total charge, Mulliken, NBO
