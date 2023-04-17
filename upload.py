@@ -6,9 +6,6 @@ from getData import get_data
 from user import username, password
 import json
 
-# # test to see if a simply function from pymongo works
-# client = MongoClient('localhost', 27017)
-
 def create_user_file():
     # create the file
     username = input("Enter username: ")
@@ -19,20 +16,12 @@ def create_user_file():
 
 if not os.path.exists("user.py"):
     create_user_file()
-# from user import username, password, name_of_user
+from user import username, password, name_of_user
 
-# mongodb+srv://jstrik:strik@cluster0.tk9aheu.mongodb.net/?retryWrites=true&w=majority
-# mongodb+srv://jstrik:strik@cluster0.tk9aheu.mongodb.net/test
 
 client = pymongo.MongoClient("mongodb+srv://{username}:{password}@cluster0.tk9aheu.mongodb.net/test".format(username=username, password=password), tlsCAFile=certifi.where())
 db = client.Main
 collection = db.molecules
-
-
-#  client = pymongo.MongoClient("mongodb+srv://jstrik:strik@cluster0.tk9aheu.mongodb.net/?retryWrites=true&w=majority")
-# db = client.Main
-# collection = db.molecules
-
 
 logfiles = []
 path = ''
@@ -63,17 +52,6 @@ else:
 logfiles = [os.path.join(path, f) for f in logfiles]
 
 molecules = get_data(logfiles)
-
-# insert the data into the database
-
-# debug output to json
-# with open("testData6.json", "w") as f:
-#     for mol in molecules:
-#         mol = mol.__dict__
-#         if mol['status'] != 'Error':
-#             mol['identifier'] = f'{mol["name"]}_{mol["basis_sets"]}_{mol["functional"]}'
-#         f.write(json.dumps(mol))
-
 
 for mol in molecules:
     mol = mol.__dict__
