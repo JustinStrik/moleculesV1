@@ -17,8 +17,8 @@ def create_user_file():
     with open("user.py", "w") as file:
         file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
 
-# if not os.path.exists("user.py"):
-#     create_user_file()
+if not os.path.exists("user.py"):
+    create_user_file()
 # from user import username, password, name_of_user
 
 # mongodb+srv://jstrik:strik@cluster0.tk9aheu.mongodb.net/?retryWrites=true&w=majority
