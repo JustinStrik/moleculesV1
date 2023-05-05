@@ -6,18 +6,11 @@ from getData import get_data
 # from user import username, password
 import json
 
-
-def create_user_file():
-    # create the file
-    username = input("Enter username: ")
-    password = input("Enter password: ")
-    name_of_user = input("Enter name of user: ")
-    # with open("user.py", "w") as file:
-    #     file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
-
 username, password, name_of_user = "", "", ""
-create_user_file()
 
+username = input("Enter username: ")
+password = input("Enter password: ")
+name_of_user = input("Enter name of user: ")
 
 client = pymongo.MongoClient("mongodb+srv://{username}:{password}@cluster0.tk9aheu.mongodb.net/test".format(username=username, password=password), tlsCAFile=certifi.where())
 db = client.Main
