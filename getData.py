@@ -54,29 +54,32 @@ def get_charges():
         if (found_hirshfeld and found_mulliken):
             return
         
-        if (line == '  Mulliken charges:\n' and not found_mulliken):
+        # line just contains "Mulliken charges"
+        if ('Mulliken charges' in line and not found_mulliken):
             found_mulliken = True      
             # go down (not reverse) and scan all lines in this format     
             # only intterested in the last value in the line (charge)
 
             iter = 0
-            for chargeline in lines[lines.index(line) + 1:]:
+            for chargeline in lines[lines.index(line) + 2:]:
                 if chargeline == '\n':
                     break
                 values = chargeline.split()
-                current_mol.opt_xyz[iter]['mulliken'](float(values[len(values) - 1]))
+                current_mol.opt_xyz[iter]['mulliken'] = (float(values[-1]))
                 iter += 1
 
         # if line contains "Hirshfeld charges"
-        if (line == '  Hirshfeld charges:\n' and not found_hirshfeld):
+        if ('Hirshfeld charges' in line and not found_hirshfeld):
             found_hirshfeld = True
             iter = 0
 
-            for chargeline in lines[lines.index(line) + 1:]:
-                if chargeline == '\n':
+            for chargeline in lines[lines.index(line) + 2:]:
+                if chargeline == ' \n' or iter >= len(current_mol.opt_xyz):
                     break
                 values = chargeline.split()
-                current_mol.opt_xyz[iter]['hirshfeld'](float(values[len(values) - 1]))
+                # add new property 'hirshfeld to the opt_xyz dictionary
+                charge_val = float(values[-1])
+                current_mol.opt_xyz[iter]['hirshfeld'] = charge_val
                 iter += 1
 
 # elapsed time
@@ -174,14 +177,12 @@ def get_data_lines():
                 data_lines = data_lines.replace(' ', '')
                 break    
             
-def get_name():
+# def get_name():
     # get the name of the molecule
     # in data lines, between two \\
     # test = data_lines.split('\\\\')
     # current_mol.name = data_lines.split('\\\\')[2]
 
-    # name is name of file without .log
-    current_mol.name = current_mol.name.split('.log')[0]
 
 
 def get_data(logfiles):
@@ -202,7 +203,9 @@ def get_data(logfiles):
             lines = logfile.readlines()
             dataLines = ''
             get_status()
-            get_name()
+            # get_name()
+            # logfile name without .log
+            current_mol.name = logfile.name.split('.log')[0].split('/')[-1]
             if current_mol.status == 'Error':
                 # if there was an error, skip the rest of the file
                 molecules.append(current_mol)
