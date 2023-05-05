@@ -4,7 +4,6 @@
 class molecule:
     name = ""
     status = ""
-    time = ""
     upload_date = ""
     upload_time = ""
     cpu_time = ""
