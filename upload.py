@@ -6,16 +6,17 @@ from getData import get_data
 # from user import username, password
 import json
 
+username, password, name_of_user = "", "", ""
 
 def create_user_file():
     # create the file
+    global username, password, name_of_user
     username = input("Enter username: ")
     password = input("Enter password: ")
     name_of_user = input("Enter name of user: ")
     # with open("user.py", "w") as file:
     #     file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
 
-username, password, name_of_user = "", "", ""
 create_user_file()
 
 
