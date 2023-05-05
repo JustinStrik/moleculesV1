@@ -34,9 +34,8 @@ def get_homo_lumo():
             linefound = True
 
 def get_dipole():
-    print("help")
-        # no 'e' (exponent) should be in the basis set
-    current_mol.dipole = []
+    # no 'e' (exponent) should be in the basis set
+    current_mol.dipole = [] # type: ignore
     current_mol.dipole.append(float(data_lines.split('Dipole=')[1].split(',')[0]))
     current_mol.dipole.append(float(data_lines.split('Dipole=')[1].split(',')[1]))
     current_mol.dipole.append(float(data_lines.split('Dipole=')[1].split(',')[2].split('\\')[0]))
@@ -46,6 +45,42 @@ def get_dipole():
     # current_mol.functional = float(data_lines.split('Dipole=')[1].split(',')[1])
     # print(data_lines.split('Dipole=')[1].split(',')[2].split('\\')[0])
     # current_mol.stoichiometry = float(data_lines.split('Dipole=')[1].split(',')[2].split('\\')[0])
+
+def get_charges():
+    found_mulliken, found_hirshfeld = False, False
+
+    # reverse iterate over lines
+    for line in reversed(lines):
+        if (found_hirshfeld and found_mulliken):
+            return
+        
+        # line just contains "Mulliken charges"
+        if ('Mulliken charges' in line and not found_mulliken):
+            found_mulliken = True      
+            # go down (not reverse) and scan all lines in this format     
+            # only intterested in the last value in the line (charge)
+
+            iter = 0
+            for chargeline in lines[lines.index(line) + 2:]:
+                if chargeline == '\n':
+                    break
+                values = chargeline.split()
+                current_mol.opt_xyz[iter]['mulliken'] = (float(values[-1]))
+                iter += 1
+
+        # if line contains "Hirshfeld charges"
+        if ('Hirshfeld charges' in line and not found_hirshfeld):
+            found_hirshfeld = True
+            iter = 0
+
+            for chargeline in lines[lines.index(line) + 2:]:
+                if chargeline == ' \n' or iter >= len(current_mol.opt_xyz):
+                    break
+                values = chargeline.split()
+                # add new property 'hirshfeld to the opt_xyz dictionary
+                charge_val = float(values[-1])
+                current_mol.opt_xyz[iter]['hirshfeld'] = charge_val
+                iter += 1
 
 # elapsed time
 def get_time():
@@ -76,7 +111,6 @@ def get_time():
 def get_upload_date_and_time():
     current_mol.upload_date = datetime.datetime.now().strftime("%Y-%m-%d")
     current_mol.upload_time = datetime.datetime.now().strftime("%H:%M:%S")
-    print(current_mol.upload_date)
 
 def get_opt_xyz():
     xyz_data = data_lines.split('\\\\')[3]
@@ -103,12 +137,11 @@ def get_opt_xyz():
 
 # get whether or not there was an error, read only the bottom 100 lines of the file searching for 'Error termination'
 def get_status():
+    status = 'No Error'
     for line in lines:
         if 'Error termination' in line:
             status = 'Error'
             break
-        else:
-            status = 'No Error'
     current_mol.status = status
 
 # line looks like  %NProcShared=16
@@ -143,6 +176,14 @@ def get_data_lines():
                 data_lines = data_lines.replace('\n', '')
                 data_lines = data_lines.replace(' ', '')
                 break    
+            
+# def get_name():
+    # get the name of the molecule
+    # in data lines, between two \\
+    # test = data_lines.split('\\\\')
+    # current_mol.name = data_lines.split('\\\\')[2]
+
+
 
 def get_data(logfiles):
     # get all files that end with .log in the database directory
@@ -161,17 +202,16 @@ def get_data(logfiles):
             # Read all lines from the file
             lines = logfile.readlines()
             dataLines = ''
-            get_data_lines()
-
-
-            # get the name of the file, could be in any directory so just get the last part of the path
-            current_mol.name = logfile.name.split('/')[-1].split('.')[0]
             get_status()
-            get_upload_date_and_time()
+            # get_name()
+            # logfile name without .log
+            current_mol.name = logfile.name.split('.log')[0].split('/')[-1]
             if current_mol.status == 'Error':
                 # if there was an error, skip the rest of the file
                 molecules.append(current_mol)
                 continue
+            get_data_lines()
+            get_upload_date_and_time()
 
             get_homo_lumo()
             get_NPROC()
@@ -180,6 +220,7 @@ def get_data(logfiles):
             get_time()
             get_method()
             get_opt_xyz()
+            get_charges()
 
             # add the molecule to the list of molecules
             molecules.append(current_mol)
