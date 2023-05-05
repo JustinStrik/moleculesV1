@@ -6,6 +6,7 @@ class molecule:
     status = ""
     upload_date = ""
     upload_time = ""
+    uploader = ""
     cpu_time = ""
     elapsed_time = ""
     NPROC: float = 0
@@ -22,5 +23,5 @@ class molecule:
     spin_multiplicity: int = 0
     S2 = 0
     total_charge = 0
-    Mulliken = ""
+    # Mulliken = ""
     NBO = ""

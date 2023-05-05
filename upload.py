@@ -64,6 +64,8 @@ for mol in molecules:
     if mol['status'] != 'Error':
         mol['identifier'] = f'{mol["name"]}.{mol["basis_sets"]}.{mol["functional"]}'
 
+    mol['uploader'] = name_of_user
+
     ret_val = collection.insert_one(mol)
     if ret_val.acknowledged:
         print("Successfully inserted molecule: {name}".format(name=mol['name']))
