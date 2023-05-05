@@ -60,27 +60,35 @@ def get_charges():
             # go down (not reverse) and scan all lines in this format     
             # only intterested in the last value in the line (charge)
 
-            iter = 0
+            atom_index = 0
             for chargeline in lines[lines.index(line) + 2:]:
-                if chargeline == '\n':
-                    break
                 values = chargeline.split()
-                current_mol.opt_xyz[iter]['mulliken'] = (float(values[-1]))
-                iter += 1
+                if values == []:
+                    break
+                # or if first index of values isnt an int
+                if chargeline == '\n' or atom_index >= len(current_mol.opt_xyz) or not values[0].isdigit():
+                    break
+
+                charge_val = float(values[-1])
+                atom_index = int(values[0]) - 1
+                current_mol.opt_xyz[atom_index]['mulliken'] = (float(charge_val))
+                atom_index += 1
 
         # if line contains "Hirshfeld charges"
         if ('Hirshfeld charges' in line and not found_hirshfeld):
             found_hirshfeld = True
-            iter = 0
+            atom_index = 0
 
             for chargeline in lines[lines.index(line) + 2:]:
-                if chargeline == ' \n' or iter >= len(current_mol.opt_xyz):
+                # break if line is empty or we have reached the end of the opt_xyz dictionary
+                if chargeline == ' \n' or atom_index >= len(current_mol.opt_xyz):
                     break
                 values = chargeline.split()
                 # add new property 'hirshfeld to the opt_xyz dictionary
                 charge_val = float(values[-1])
-                current_mol.opt_xyz[iter]['hirshfeld'] = charge_val
-                iter += 1
+                atom_index = int(values[0]) - 1
+                current_mol.opt_xyz[atom_index]['hirshfeld'] = charge_val
+                atom_index += 1 # will break if we access the value before the last
 
 # elapsed time
 def get_time():

@@ -7,10 +7,19 @@ from getData import get_data
 import json
 
 username, password, name_of_user = "", "", ""
+# if user.py exists, import username and password from there
+if not os.path.exists("user.py"):
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+    name_of_user = input("Enter name of user: ")
+else:
+    from user import username, password, name_of_user
 
-username = input("Enter username: ")
-password = input("Enter password: ")
-name_of_user = input("Enter name of user: ")
+
+
+
+
+
 
 client = pymongo.MongoClient("mongodb+srv://{username}:{password}@cluster0.tk9aheu.mongodb.net/test".format(username=username, password=password), tlsCAFile=certifi.where())
 db = client.Main
