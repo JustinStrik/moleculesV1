@@ -200,6 +200,7 @@ def get_data(logfiles):
 
     # loop over all log files
     for logfile in logfiles: 
+        print('Getting data from ' + logfile + '...')
         global current_mol
         current_mol = molecule()
         global lines
