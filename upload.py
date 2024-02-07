@@ -23,7 +23,11 @@ print("Password: {password}".format(password=password))
 print("Name of user: {name_of_user}".format(name_of_user=name_of_user))
 
 # connect to the database
-cluster = MongoClient("mongodb+srv://{username}:{password}@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password))
+cluster = MongoClient("mongodb+srv://{username}:{password}@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password),     
+tls=True,
+tlsAllowInvalidCertificates=True)
+                             
+                             # ?)
 db = cluster["moleculesTestV1"]
 collection = db["moleculesTesting1"]
 
