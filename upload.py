@@ -1,6 +1,7 @@
 import os
 import sys
-from pymongo import MongoClient
+from pymongo import MongoClient # type: ignore
+from getOrcaData import get_orca_data
 from getData import get_data
 
 def create_user_file(username, password, name_of_user):
@@ -44,14 +45,22 @@ print("Directory: {directory}".format(directory=directory))
 
 # get all files that end with .log in the database directory
 logfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.log')]
+# outfiles are orca output files
+outfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.out')]
 
 # print all the log files
 print("Log files:")
 for logfile in logfiles:
     print(logfile)
 
+# print all the out files
+print("Out files:")
+for outfile in outfiles:
+    print(outfile)
+
 # array of molecules to upload
 molecules = get_data(logfiles)
+mol_orca = get_orca_data(outfiles)
 
 for mol in molecules:
     toDB = mol.__dict__
