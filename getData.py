@@ -216,7 +216,6 @@ def get_data(logfiles):
         data_lines = ''
         with open(logfile, 'r') as logfile:
             # Read all lines from the file
-            global lines
             lines = logfile.readlines()
             dataLines = ''
             get_status()
