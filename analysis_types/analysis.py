@@ -19,7 +19,7 @@ class Analysis:
             function()
         except Exception as e:
             # convert function to string
-            print("Error in function: " + str(function) + "with logfile: " + logfile)
+            print("Error in function: " + str(function) + "with logfile: ") # TODO
         pass
 
     # sometimes a file has a header or a footer that makes the lines
@@ -59,11 +59,11 @@ class Analysis:
                 self.molecules.append(current_mol)
 
         # print molecules
-        for mol in molecules:
+        for mol in self.molecules:
             # print all the data for each molecule
             print(mol.name, mol.status, mol.HOMO, mol.LUMO, mol.GAP, mol.NPROC, mol.electronic_energy, mol.dipole_xyz, mol.dipole, mol.basis_sets, mol.functional, mol.stoichiometry, sep=', ')
 
-        return molecules
+        return self.molecules
     
 
     @abstractmethod
