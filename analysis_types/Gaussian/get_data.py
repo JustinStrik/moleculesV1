@@ -8,6 +8,8 @@ molecules = []
 # this contains the lines with the main data we are concerned with
 # reduces the number of times we have to loop over the file
 
+# class Gaussian is from  Analysis
+
 def get_homo_lumo(): 
     linefound = False
 
