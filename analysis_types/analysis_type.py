@@ -7,6 +7,9 @@ from molecule import molecule
 
 class Analysis_Type:
 
+    # abstract variable
+    
+
     def __init__(self) -> None:
         pass
 
