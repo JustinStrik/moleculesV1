@@ -64,6 +64,11 @@ for outfile in outfiles:
 
 # array of molecules to upload
 molecules = get_data(logfiles)
+
+# change all molecules.uploader to name_of_user in just one line
+for mol in molecules:
+    mol.uploader = name_of_user
+
 mol_orca = get_orca_data(outfiles)
 
 for mol in molecules:

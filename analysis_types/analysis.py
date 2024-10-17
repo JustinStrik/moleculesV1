@@ -18,7 +18,8 @@ class Analysis:
         try:
             function()
         except Exception as e:
-            print("Error in function: ")
+            # convert function to string
+            print("Error in function: " + str(function) + "with logfile: " + logfile)
         pass
 
     # sometimes a file has a header or a footer that makes the lines
