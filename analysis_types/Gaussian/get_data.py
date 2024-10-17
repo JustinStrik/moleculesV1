@@ -8,6 +8,8 @@ molecules = []
 # this contains the lines with the main data we are concerned with
 # reduces the number of times we have to loop over the file
 
+# class Gaussian is from  Analysis
+
 def get_homo_lumo(): 
     linefound = False
 
@@ -30,6 +32,7 @@ def get_homo_lumo():
 
             current_mol.HOMO = float(values[len(values) - 1]) # last value in the list
             linefound = True
+
 
 def get_dipole():
     current_mol.dipole_xyz = data_lines.split('RMSD=')[1].split('\\')[0]

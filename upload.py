@@ -1,72 +1,71 @@
-import pymongo
 import os
 import sys
-import certifi
+from pymongo import MongoClient # type: ignore
+from pymongo.server_api import ServerApi
+from getOrcaData import get_orca_data
 from getData import get_data
-# from user import username, password
-import json
 
-username, password, name_of_user = "", "", ""
-# if user.py exists, import username and password from there
+def create_user_file(username, password, name_of_user):
+    # create the file
+    with open("user.py", "w") as file:
+        file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
+
+# if the user.py file does not exist, create it
 if not os.path.exists("user.py"):
-    username = input("Enter username: ")
-    password = input("Enter password: ")
-    name_of_user = input("Enter name of user: ")
+    print("Please enter your username, password, and name of user")
+    username = input("Username: ")
+    password = input("Password: ")
+    name_of_user = input("Name of user: ")
+    create_user_file(username, password, name_of_user)
+
+from user import username, password, name_of_user
+
+print("Username: {username}".format(username=username))
+print("Password: {password}".format(password=password))
+print("Name of user: {name_of_user}".format(name_of_user=name_of_user))
+
+# connect to the database
+cluster = MongoClient("mongodb+srv://{username}:{password}@cluster0.tk9aheu.mongodb.net/test".format(username=username, password=password),     
+tls=True,
+tlsAllowInvalidCertificates=True)
+                             
+                             # ?)
+db = cluster["Main"]
+collection = db["molecules"]
+
+if (len(sys.argv) > 1):
+    # if the user passed in a directory, use that directory
+    directory = sys.argv[1]
 else:
-    from user import username, password, name_of_user
+    # prompt user for directory
+    directory = input("Enter the directory of the log files: ")
 
+# reformat directory to be compatible with os.path.join
+directory = directory.replace('\\', '/')
+print("Directory (nothing for current directory): {directory}".format(directory=directory))
 
+if directory == "":
+    directory = "."
 
+# get all files that end with .log in the database directory
+logfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.log')]
+# outfiles are orca output files
+outfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.out')]
 
+# print all the log files
+print("Log files:")
+for logfile in logfiles:
+    print(logfile)
 
+# print all the out files
+print("Out files:")
+for outfile in outfiles:
+    print(outfile)
 
-
-client = pymongo.MongoClient("mongodb+srv://{username}:{password}@cluster0.tk9aheu.mongodb.net/test".format(username=username, password=password), tlsCAFile=certifi.where())
-db = client.Main
-collection = db.molecules
-# allow user to choose from one of the following collections
-# DGQD
-# FeXGQD
-# Graphyne
-# LIG
-print("Choose a collection to upload to:")
-print("1. DGQD")
-print("2. FeXGQD")
-print("3. Graphyne")
-print("4. LIG")
-print("5. molecules")
-choice = input("Enter a number: ")
-if choice == "1":
-    collection = db.DGQD
-elif choice == "2":
-    collection = db.FeXGQD
-elif choice == "3":
-    collection = db.Graphyne
-elif choice == "4":
-    collection = db.LIG
-
-logfiles = []
-path = os.getcwd()
-
-# get files from all subdirectories
-for root, dirs, files in os.walk(path):
-    for file in files:
-        if file.endswith(".log"):
-            logfiles.append(os.path.join(root, file))        
-
-# change logfiles to paths to the files
-logfiles = [os.path.join(path, f) for f in logfiles]
-
+# array of molecules to upload
 molecules = get_data(logfiles)
+mol_orca = get_orca_data(outfiles)
 
 for mol in molecules:
-    mol = mol.__dict__
-    if mol['status'] != 'Error':
-        mol['identifier'] = f'{mol["name"]}.{mol["basis_sets"]}.{mol["functional"]}'
-
-    mol['uploader'] = name_of_user
-
-    ret_val = collection.insert_one(mol)
-    if ret_val.acknowledged:
-        print("Successfully inserted molecule: {name}".format(name=mol['name']))
-
+    toDB = mol.__dict__
+    collection.insert_one(toDB)
