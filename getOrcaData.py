@@ -1,39 +1,125 @@
-# File name: Fe_CCNN_opt; 2. software name and version: ORCA 5.0.3; 3 total energy: -49837.34177 eV; 4. band gap: find the last showed ORBITAL ENERGIES, and in there, find the E(ev) of HOMO=0.0145eV (find it by check first zero value in OCC column) LUMO=-6.6352eV(it is number before LUMO), gap=HOMO-LUMO;  5. Charge: Find metal’s charge, in here is Fe. You can have a metal list to do this.  (1) MULLIKEN ATOMIC CHARGES: 0.541632 (2) LOEWDIN ATOMIC CHARGES: 0.212568. 
+from ORCAMolecule import ORCAMolecule
 
-
-class molecule:
-    def __init__(self):
-        self.file_name = None
-        self.software_name = None
-        self.software_version = None
-        self.total_energy = None
-        self.band_gap = None
-        self.homo = None
-        self.lumo = None
-        self.charge = None
-        self.mulliken_atomic_charges = None
-        self.loewdin_atomic_charges = None
-        
+lines = [] # global lines
 current_mol = []
+molecules = []
 
-def get_file_name():
-    pass
+def get_total_energy():
+    for line in reversed(lines):
+        words = line.split()
+        if len(words) > 2:
+            # first two are Total Energy
+            if words[0] == 'Total' and words[1] == 'Energy':
+                # get second to last word and store as current_mol.total_energy
+                current_mol.total_energy = float(words[-2])
+                break
+    
+def get_charge():
+    # requires a list of metals
+    # list of all metals atomic symbols: H, Li, Be, Na, Mg, K, Ca, Rb, Sr, Cs, Ba, Fr, Ra, Sc, Y, La, Ac, Ti, Zr, Hf, V, Nb, Ta, Cr, Mo, W, Mn, Tc, Re, Fe, Ru, Os, Co, Rh, Ir, Ni, Pd, Pt, Cu, Ag, Au, Zn, Cd, Hg, B, Al, Ga, In, Tl, C, Si, Ge, Sn, Pb, N, P, As, Sb, Bi, O, S, Se, Te, Po, F, Cl, Br, I, At, He, Ne, Ar, Kr, Xe, Rn
+    metals = ['H', 'Li', 'Be', 'Na', 'Mg', 'K', 'Ca', 'Rb', 'Sr', 'Cs', 'Ba', 'Fr', 'Ra', 'Sc', 'Y', 'La', 'Ac', 'Ti', 'Zr', 'Hf', 'V', 'Nb', 'Ta', 'Cr', 'Mo', 'W', 'Mn', 'Tc', 'Re', 'Fe', 'Ru', 'Os', 'Co', 'Rh', 'Ir', 'Ni', 'Pd', 'Pt', 'Cu', 'Ag', 'Au', 'Zn', 'Cd', 'Hg', 'B', 'Al', 'Ga', 'In', 'Tl', 'C', 'Si', 'Ge', 'Sn', 'Pb', 'N', 'P', 'As', 'Sb', 'Bi', 'O', 'S', 'Se', 'Te', 'Po', 'F', 'Cl', 'Br', 'I', 'At', 'He', 'Ne', 'Ar', 'Kr', 'Xe', 'Rn']
+    # find the last instance of 'MULLIKEN ATOMIC CHARGES'
+
+    last_mulliken_atomic_charges_line = -1
+    last_loewdin_atomic_charges_line = -1
+    # reverse iterate through the lines
+    for line in reversed(lines):
+        # if the line contains 'MULLIKEN ATOMIC CHARGES'
+        if 'MULLIKEN ATOMIC CHARGES' in line:
+            # find the index of the line
+            last_mulliken_atomic_charges_line = lines.index(line)
+            break
+
+        # skip to the line after the line with the four words
+        last_mulliken_atomic_charges_line += 1
+
+    # iterate through the lines starting at the line after the line with the four words
+    for line in lines[last_mulliken_atomic_charges_line:]:
+        if len(line.split()) == 4:
+            # if the first word in the line is in the metals list
+            if line.split()[0] in metals:
+                # add the charge to the current_mol object
+                current_mol.mulliken_atomic_charge = float(line.split()[3])
+                break
+
+    # find the last instance of 'LOEWDIN ATOMIC CHARGES'
+    for line in reversed(lines):
+        if 'LOEWDIN ATOMIC CHARGES' in line:
+            last_loewdin_atomic_charges_line = lines.index(line)
+            break
+
+    # skip to the line after the line with the four words
+    last_loewdin_atomic_charges_line += 1
+
+    # iterate through the lines starting at the line after the line with the four words
+    for line in lines[last_loewdin_atomic_charges_line:]:
+        if len(line.split()) == 4:
+            if line.split()[0] in metals:
+                current_mol.loewdin_atomic_charge = float(line.split()[3])
+                break
+
+    
+
+# write get band gap function, also gets homo and lumo
+def get_band_gap():
+    # find line with only two words: ORBITAL ENERGIES
+    last_orbital_energies_line = -1
+    
+    for line in reversed(lines):
+        words_in_line = line.split()
+        if len(words_in_line) == 2:
+            if words_in_line[0] == 'ORBITAL' and words_in_line[1] == 'ENERGIES':
+                last_orbital_energies_line = lines.index(line)
+                break
+
+    #skip to the line after the line with the four words
+    for line in lines[last_orbital_energies_line:]:
+        if len(line.split()) == 4:
+            last_orbital_energies_line = lines.index(line) + 1
+            break
+
+    for line in lines[last_orbital_energies_line:]:
+        words_in_line = line.split()
+        previous_eev = -1
+        if len(words_in_line) == 4:
+            previous_eev = float(words_in_line[3])
+            if float(words_in_line[3]) > 0:
+                current_mol.homo = float(words_in_line[3])
+                current_mol.lumo = previous_eev
+                current_mol.gap = current_mol.homo - current_mol.lumo
+                break
+
+def get_software_name_and_version():
+    for line in lines:
+        if 'Program Version' in line:
+            current_mol.software_name_and_version = line.split('Program Version')[1].split('-')[0].strip()
+            break
+
+
+
+# create get functions for all attributes
 
 def get_orca_data(outfiles):
-    # get all files that end with .log in the database directory
-    # make sure the logfile name is the same as the path to the file
-    # logfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.log')]
 
-    # loop over all log files
+    # loop over all out files
     for outfile in outfiles:
 
         global current_mol
-        current_mol = molecule()
+        current_mol = {}
 
         with open(outfile, 'r') as outfile:
             # Read all lines from the file
             global lines
             lines = outfile.readlines()
+            current_mol = ORCAMolecule()
+            current_mol.file_name = outfile.name.split('/')[-1].split('.')[0]
+            get_software_name_and_version()
+            get_band_gap()
+            get_charge()
+
+            molecules.append(current_mol)
+
+    return molecules
 
     
             

@@ -1,6 +1,7 @@
 import os
 import sys
 from pymongo import MongoClient # type: ignore
+from pymongo.server_api import ServerApi
 from getOrcaData import get_orca_data
 from getData import get_data
 
@@ -24,13 +25,13 @@ print("Password: {password}".format(password=password))
 print("Name of user: {name_of_user}".format(name_of_user=name_of_user))
 
 # connect to the database
-cluster = MongoClient("mongodb+srv://{username}:{password}@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password),     
+cluster = MongoClient("mongodb+srv://{username}:{password}@cluster0.tk9aheu.mongodb.net/test".format(username=username, password=password),     
 tls=True,
 tlsAllowInvalidCertificates=True)
                              
                              # ?)
-db = cluster["moleculesTestV1"]
-collection = db["moleculesTesting1"]
+db = cluster["Main"]
+collection = db["molecules"]
 
 if (len(sys.argv) > 1):
     # if the user passed in a directory, use that directory
@@ -41,7 +42,10 @@ else:
 
 # reformat directory to be compatible with os.path.join
 directory = directory.replace('\\', '/')
-print("Directory: {directory}".format(directory=directory))
+print("Directory (nothing for current directory): {directory}".format(directory=directory))
+
+if directory == "":
+    directory = "."
 
 # get all files that end with .log in the database directory
 logfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.log')]
