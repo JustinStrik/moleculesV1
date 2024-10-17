@@ -1,12 +1,16 @@
 # molecule class
 # has each of these data points: Name,status, time, NPROC, HOMO, LUMO, GAP,Electronic energy, Dipole xyz, Dipole,basis sets, functional,stoichiometry,spin multiplicity, S2, total charge, Mulliken, NBO
 
+from analysis_types import analysis_type
+
+
 class molecule:
     name = ""
     status = ""
     upload_date = ""
     upload_time = ""
     uploader = ""
+    analysis_type = ""
     cpu_time = ""
     elapsed_time = ""
     NPROC: float = 0
