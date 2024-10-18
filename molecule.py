@@ -1,5 +1,6 @@
 # molecule class
 # has each of these data points: Name,status, time, NPROC, HOMO, LUMO, GAP,Electronic energy, Dipole xyz, Dipole,basis sets, functional,stoichiometry,spin multiplicity, S2, total charge, Mulliken, NBO
+from analysis_types import analysis_type
 
 class Molecule:
     name = ""
@@ -7,7 +8,7 @@ class Molecule:
     upload_date = ""
     upload_time = ""
     uploader = ""
-    analysis_type = ""
+    analysis_type = None # will be obj
     cpu_time = ""
     elapsed_time = ""
     NPROC: float = 0
@@ -34,7 +35,11 @@ class Molecule:
         self.uploader = uploader
         self.analysis_type = analysis_type
 
-    def get_data(self):
-        pass
-
-    # make initialization with 
+    def get_data(self, file_path):
+        if hasattr(self.analysis_type, 'get_data'):
+            return self.analysis_type.get_data(self, file_path)
+        else:
+            if (self.analysis_type == None):
+                raise AttributeError(f"Molecule {self.name} does not have an analysis type, somehow.")
+            else:
+                raise AttributeError(f"In molecule {self.name}, {self.analysis_type} does not have a get_data method")
