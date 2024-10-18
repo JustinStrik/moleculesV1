@@ -1,7 +1,7 @@
 # molecule class
 # has each of these data points: Name,status, time, NPROC, HOMO, LUMO, GAP,Electronic energy, Dipole xyz, Dipole,basis sets, functional,stoichiometry,spin multiplicity, S2, total charge, Mulliken, NBO
 
-class molecule:
+class Molecule:
     name = ""
     status = ""
     upload_date = ""
@@ -26,3 +26,15 @@ class molecule:
     total_charge = 0
     # Mulliken = ""
     NBO = ""
+
+    def __init__(self) -> None:
+        pass
+
+    def __init__(self, uploader, analysis_type) -> None:
+        self.uploader = uploader
+        self.analysis_type = analysis_type
+
+    def get_data(self):
+        pass
+
+    # make initialization with 
