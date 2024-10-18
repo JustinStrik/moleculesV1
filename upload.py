@@ -1,12 +1,13 @@
-import glob
+from math import log
 import os
 import sys
 from pymongo import MongoClient, errors # type: ignore
 from pymongo.server_api import ServerApi
 from pyparsing import col
-from scipy import cluster
+from analysis_types import analysis_type
 from getOrcaData import get_orca_data
 from getData import get_data
+from molecule import Molecule
 
 def create_user_file(username, password, name_of_user):
     # create the file
@@ -78,46 +79,73 @@ def get_all_files_from_directory(directory):
     files = [os.path.join(directory, f) for f in os.listdir(directory)]
     return files
 
-def get_files_from_directory_with_correct_suffixes(directory):
-    global logfiles, outfiles # temporary, hopefully better method soon
+def get_desired_suffixes():
+    # suffixes as keys and analysis types as values
+    suffixes = {}
+    for type in analysis_types:
+        suffixes[type.suffix] = type
+
+    return suffixes
+
+def get_files_from_directory_with_correct_suffixes(directory, suffixes):
 
     all_files = get_all_files_from_directory(directory)
+    sorted_files = {} # dictionary with suffixes as keys and lists of files as values
 
-    # get all files that end with .log in the database directory
-    logfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.log')]
-    # outfiles are orca output files
-    outfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.out')]
+    # # get all files that end with .log in the database directory
+    # logfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.log')]
+    # # outfiles are orca output files
+    # outfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.out')]
+
+    # make suffix-specific lists
+    for suffix in suffixes:
+        sorted_files[suffix] = [f for f in all_files if f.endswith(suffix)]
+
+    return sorted_files
 
 def get_analysis_types():
     # names of subdirectories in the analysis_types directory
     global analysis_types
     analysis_types = [f for f in os.listdir("analysis_types") if os.path.isdir(os.path.join("analysis_types", f))]
 
-# print all the log files
-print("Log files:")
-for logfile in logfiles:
-    print(logfile)
+# # print all the log files
+# print("Log files:")
+# for logfile in logfiles:
+#     print(logfile)
 
-# print all the out files
-print("Out files:")
-for outfile in outfiles:
-    print(outfile)
+# # print all the out files
+# print("Out files:")
+# for outfile in outfiles:
+#     print(outfile)
 
 # array of molecules to upload
-molecules = get_data(logfiles)
+# molecules = get_data(logfiles)
 
-mol_orca = get_orca_data(outfiles)
+# mol_orca = get_orca_data(outfiles)
 
 # change all molecules.uploader to name_of_user in just one line
-for mol in molecules:
-    mol.uploader = name_of_user
+# for mol in molecules:
+#     mol.uploader = name_of_user
 
-for mol in molecules:
-    toDB = mol.__dict__
-    collection.insert_one(toDB)
+def upload_molecules_to_db(molecules):
+    for mol in molecules:
+        toDB = mol.__dict__
+        try:
+            collection.insert_one(toDB)
+        except errors.PyMongoError as err:
+            raise ConnectionError("Failed to upload molecule to the database for molecule: " + mol.name + " Analysis type: " + mol.analysis_type) from err
 
-def get_all_molecule_data(arrs):
-    pass
+def get_all_molecule_data(files_dict, name_of_user, suffixes):
+    # files_dict is a dictionary with suffixes as keys and lists of files as values
+    molecules = []
+    for suffix in files_dict:
+        analysis_type = suffixes[suffix]
+        molecule = Molecule(name_of_user, analysis_type=suffixes[suffix]) # custom object from molecule.py
+        # if suffix == ".log":
+        #     molecules += get_data(files_dict[suffix])
+        # elif suffix == ".out":
+        #     molecules += get_orca_data(files_dict[suffix])
+        molecule.get_data()
 
 # main function
 if __name__ == "__main__":
@@ -129,7 +157,14 @@ if __name__ == "__main__":
     establish_connection() # gets db and collection
 
     get_analysis_types()
-    get_files_from_directory_with_correct_suffixes(directory)
+
+    # suffizes as keys and analysis types as values
+    suffixes = get_desired_suffixes() # gets file suffixes for analysis types
+
+    molecule_files = get_files_from_directory_with_correct_suffixes(directory, suffixes)
+
+    # get all the data from the files
+    get_all_molecule_data(molecule_files, name_of_user, suffixes)
 
     pass
 
