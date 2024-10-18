@@ -1,13 +1,17 @@
 from math import log
 import os
+import re
 import sys
 from pymongo import MongoClient, errors # type: ignore
 from pymongo.server_api import ServerApi
 from pyparsing import col
 from analysis_types import analysis_type
+from analysis_types.Gaussian.Gaussian import Gaussian
 from getOrcaData import get_orca_data
 from getData import get_data
 from molecule import Molecule
+import molecule
+debug_mode = True
 
 def create_user_file(username, password, name_of_user):
     # create the file
@@ -59,12 +63,15 @@ def establish_connection():
     collection = db["molecules"]
 
 
-if (len(sys.argv) > 1):
-    # if the user passed in a directory, use that directory
-    directory = sys.argv[1]
+if not debug_mode:
+    if (len(sys.argv) > 1):
+        # if the user passed in a directory, use that directory
+        directory = sys.argv[1]
+    else:
+        # prompt user for directory
+        directory = input("Enter the directory of the log files (blank for current directory): ")
 else:
-    # prompt user for directory
-    directory = input("Enter the directory of the log files (blank for current directory): ")
+    directory = ""
 
 # reformat directory to be compatible with os.path.join
 directory = directory.replace('\\', '/')
@@ -105,8 +112,17 @@ def get_files_from_directory_with_correct_suffixes(directory, suffixes):
 
 def get_analysis_types():
     # names of subdirectories in the analysis_types directory
+    # import analysis_type Gaussian from analysis_types/Gaussian/Gaussian.py
+    import analysis_types as analysis_types_module
+
     global analysis_types
-    analysis_types = [f for f in os.listdir("analysis_types") if os.path.isdir(os.path.join("analysis_types", f))]
+    # analysis_types = [f for f in os.listdir("analysis_types") if os.path.isdir(os.path.join("analysis_types", f))]
+    # include if the file is a python file, was originally just the directory and getting __pycache__ as well
+    analysis_types = [f for f in os.listdir("analysis_types") if os.path.isfile(os.path.join("analysis_types", f, f + ".py"))]
+
+    # change analysis_types to be a list of objects that are the analysis types from the analysis_types directory
+    for i in range(len(analysis_types)):
+        analysis_types[i] = getattr(getattr(getattr(analysis_types_module, analysis_types[i]), analysis_types[i]), analysis_types[i])()
 
 # # print all the log files
 # print("Log files:")
@@ -129,23 +145,28 @@ def get_analysis_types():
 
 def upload_molecules_to_db(molecules):
     for mol in molecules:
+        mol.analysis_type = mol.analysis_type.name # change the analysis type to a string, cannot upload object type to database
         toDB = mol.__dict__
         try:
             collection.insert_one(toDB)
         except errors.PyMongoError as err:
-            raise ConnectionError("Failed to upload molecule to the database for molecule: " + mol.name + " Analysis type: " + mol.analysis_type) from err
+            raise ConnectionError("Failed to upload molecule to the database for molecule: {mol.name} Analysis type: {mol.analysis_type.name}") from err
 
 def get_all_molecule_data(files_dict, name_of_user, suffixes):
     # files_dict is a dictionary with suffixes as keys and lists of files as values
     molecules = []
+
     for suffix in files_dict:
-        analysis_type = suffixes[suffix]
-        molecule = Molecule(name_of_user, analysis_type=suffixes[suffix]) # custom object from molecule.py
-        # if suffix == ".log":
-        #     molecules += get_data(files_dict[suffix])
-        # elif suffix == ".out":
-        #     molecules += get_orca_data(files_dict[suffix])
-        molecule.get_data()
+        for file in files_dict[suffix]:
+            # molecule = Molecule(name_of_user, analysis_type=suffixes[suffix]) # custom object from molecule.py
+
+            # molecule.get_data() # implicit call to get_data method of the analysis type
+            # molecules.append(molecule)
+            molecule = Molecule(name_of_user, suffixes[suffix])
+            molecule.get_data(file)
+            molecules.append(molecule)
+
+    return molecules
 
 # main function
 if __name__ == "__main__":
@@ -164,7 +185,7 @@ if __name__ == "__main__":
     molecule_files = get_files_from_directory_with_correct_suffixes(directory, suffixes)
 
     # get all the data from the files
-    get_all_molecule_data(molecule_files, name_of_user, suffixes)
-
+    molecules = get_all_molecule_data(molecule_files, name_of_user, suffixes)
+    upload_molecules_to_db(molecules)
     pass
 
