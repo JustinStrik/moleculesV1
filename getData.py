@@ -1,6 +1,6 @@
 # gets data from log files done with Gaussian
 import os
-from molecule import molecule
+from molecule import Molecule
 import datetime
 
 # global logfile
