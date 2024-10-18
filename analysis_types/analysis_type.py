@@ -2,11 +2,12 @@
 # analysis types will extend this class
 
 from matplotlib.pyplot import cla
-from abc import ABC, abstractmethod, a
-from molecule import molecule
+from abc import ABC, abstractmethod
+from molecule import Molecule
 
 class Analysis_Type:
 
+    name = ""  # abstract variable for the name of the analysis type
     # abstract variable
     @abstractmethod
     def get_suffix():
