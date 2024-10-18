@@ -1,5 +1,7 @@
 # gets data from log files done with Gaussian
 import os
+
+from requests import get
 from analysis_types.analysis_type import Analysis_Type
 from molecule import molecule
 from analysis import Analysis
@@ -7,12 +9,19 @@ from analysis import Analysis
 # global logfile
 logfile = ''
 molecules = []
+suffix = '.log'
 # there is a data_lines string
 # this contains the lines with the main data we are concerned with
 # reduces the number of times we have to loop over the file
 
 # class Gaussian is from  Analysis
 class Gaussian(Analysis_Type):
+    
+    def get_suffix():
+        return suffix
+    
+    get_suffix = '.log'
+
     def get_homo_lumo(): 
         linefound = False
 
@@ -106,7 +115,7 @@ class Gaussian(Analysis_Type):
                 global lines
                 lines = logfile.readlines()
                 dataLines = ''
-                get_data_lines()
+                self.get_data_lines()
 
 
                 # get the name of the file, could be in any directory so just get the last part of the path
