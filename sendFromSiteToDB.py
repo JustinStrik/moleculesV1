@@ -1,7 +1,6 @@
 import os
 import sys
 from pymongo import MongoClient
-from getData import get_data
 
 def create_user_file(username, password, name_of_user):
     # create the file
