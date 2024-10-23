@@ -205,6 +205,9 @@ class Gaussian(Analysis_Type):
                     self.mol.opt_xyz[atom_index]['hirshfeld'] = charge_val
                     atom_index += 1 # will break if we access the value before the last
 
+    def make_identifier(self):
+        # doc_id = f'{molecule["name"]}_{molecule["basis_sets"]}_{molecule["functional"]}'
+        self.mol.identifier = f'{self.mol.name}_{self.mol.basis_sets}_{self.mol.functional}'
 
     def get_data(self, molecule, file_path):
         # get all files that end with .log in the database directory
@@ -240,6 +243,7 @@ class Gaussian(Analysis_Type):
             self.get_upload_date_and_time()
             self.get_opt_xyz()
             self.get_charges()
+            self.make_identifier()
 
             return self.mol
 
