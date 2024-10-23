@@ -6,7 +6,7 @@
 # import csv
 # from enum import Enum
 # import pymongo
-# from pymongo import MongoClient
+# # from pymongo import MongoClient
 # from tkinter import messagebox
 # import functools
 
@@ -57,8 +57,8 @@
 #     get_user_info()
 # from user import username, password, name_of_user
 
-# print("mongodb+srv://{username}:{password}@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password))
-# cluster = MongoClient("mongodb+srv://{username}:{password}@moleculev1.w7biaat.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password))
+# print("REMOVED")
+# cluster = REMOVED
 
 # class Status(Enum):
 #     CONFLICT = 'conflict' # item is already in the database, but with the same properties (requires override)

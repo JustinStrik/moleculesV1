@@ -1,19 +1,18 @@
 import os
-from pymongo import MongoClient
 from datetime import datetime
+import my_mongo_client
 
-def create_user_file(username, password, name_of_user):
-    # create the file
-    with open("user.py", "w") as file:
-        file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
+# def create_user_file(username, password, name_of_user):
+#     # create the file
+#     with open("user.py", "w") as file:
+#         file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
 
 # if the user.py file does not exist, create it
-if not os.path.exists("user.py"):
-    print("Please enter your username, password, and name of user")
-    username = input("Username: ")
-    password = input("Password: ")
-    name_of_user = input("Name of user: ")
-    create_user_file(username, password, name_of_user)
+print("Please enter your username, password, and name of user")
+username = input("Username: ")
+password = input("Password: ")
+name_of_user = input("Name of user: ")
+# create_user_file(username, password, name_of_user)
 
 from user import username, password, name_of_user
 
@@ -22,9 +21,7 @@ print("Password: {password}".format(password=password))
 print("Name of user: {name_of_user}".format(name_of_user=name_of_user))
 
 # connect to the database
-cluster = MongoClient("mongodb+srv://{username}:{password}@cluster0.tk9aheu.mongodb.net/?retryWrites=true&w=majority".format(username=username, password=password),
-tls=True,
-tlsAllowInvalidCertificates=True)
+cluster = my_mongo_client.connect_to_database(username, password)
 
 db = cluster["Main"]
 collection = db["XYZfromSite"]

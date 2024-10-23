@@ -3,29 +3,29 @@ import os
 import re
 import sys
 from pymongo import MongoClient, errors # type: ignore
-from pymongo.server_api import ServerApi
-from pyparsing import col
-from analysis_types import analysis_type
-from analysis_types.Gaussian.Gaussian import Gaussian
-from getOrcaData import get_orca_data
-from getData import get_data
+from my_mongo_client import connect_to_database
 from molecule import Molecule
-import molecule
 debug_mode = True
 
-def create_user_file(username, password, name_of_user):
-    # create the file
-    with open("user.py", "w") as file:
-        file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
+# def create_user_file(username, password, name_of_user):
+#     # create the file
+#     with open("user.py", "w") as file:
+#         file.write("# this file stores usernames and passwords for the database\nusername=\"{username}\"\npassword=\"{password}\"\nname_of_user=\"{name_of_user}\"".format(username=username, password=password, name_of_user=name_of_user))
 
-def check_user_file():
-    # if the user.py file does not exist, create it
-    if not os.path.exists("user.py"):
+# def check_user_file():
+#     # if the user.py file does not exist, create it
+#     if not os.path.exists("user.py"):
+def get_user():
+    if not debug_mode:
         print("Please enter your username, password, and name of user")
         username = input("Username: ")
         password = input("Password: ")
         name_of_user = input("Name of user: ")
-        create_user_file(username, password, name_of_user)   
+    else:
+        from user import username, password, name_of_user
+    return username, password, name_of_user
+
+# create_user_file(username, password, name_of_user)   
 
 def announce_user():
     from user import username, password, name_of_user
@@ -39,9 +39,7 @@ def connect_to_db():
     global client
     try:
         # Set a timeout for the connection (in milliseconds)
-        client = MongoClient("mongodb+srv://{username}:{password}@cluster0.tk9aheu.mongodb.net/test".format(username=username, password=password),     
-            tls=True,
-            tlsAllowInvalidCertificates=True)
+        client = connect_to_database(username, password)
         
         # Attempt to connect to the server
         client.server_info()  # Will throw an exception if unable to connect
@@ -118,7 +116,8 @@ def get_analysis_types():
     global analysis_types
     # analysis_types = [f for f in os.listdir("analysis_types") if os.path.isdir(os.path.join("analysis_types", f))]
     # include if the file is a python file, was originally just the directory and getting __pycache__ as well
-    analysis_types = [f for f in os.listdir("analysis_types") if os.path.isfile(os.path.join("analysis_types", f, f + ".py"))]
+    # except for the Sample_Analysis folder
+    analysis_types = [f for f in os.listdir("analysis_types") if os.path.isfile(os.path.join("analysis_types", f, f + ".py")) and f != "Sample_Analysis"]
 
     # change analysis_types to be a list of objects that are the analysis types from the analysis_types directory
     for i in range(len(analysis_types)):
@@ -196,8 +195,8 @@ def get_all_molecule_data(files_dict, name_of_user, suffixes):
 
 # main function
 if __name__ == "__main__":
-    check_user_file()
-    from user import username, password, name_of_user
+    # check_user_file() # now asks for input every time
+    username, password, name_of_user = get_user()
     announce_user()
 
     client = connect_to_db()
