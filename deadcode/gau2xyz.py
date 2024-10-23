@@ -7,6 +7,8 @@
 ##  $ python3 gau2xyz.py Gaussian_output.log
 ## -------------------------------------------------------
 
+#ORIGINAL CODE, UPDATED IN GAUSSIAN.PY!
+
 import sys
 import re
 import numpy

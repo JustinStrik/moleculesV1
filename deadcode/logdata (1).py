@@ -3,6 +3,8 @@
 #so make sure you look over the dat.csv file generated to fix
 #the data
 
+#ORIGINAL CODE, UPDATED IN GAUSSIAN.PY!
+
 import sys
 import re
 import glob
