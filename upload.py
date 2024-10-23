@@ -143,12 +143,38 @@ def get_analysis_types():
 # for mol in molecules:
 #     mol.uploader = name_of_user
 
+# checks to see if mol.identifier is already in the database
+def check_for_duplicates(molecules):
+    conflict_molecules = []
+    for mol in molecules:
+        # doc_id = f'{mol.name}_{mol.basis_sets}_{mol.functional}'
+        existing_doc = collection.find_one({"identifier": mol.identifier})
+        if existing_doc:
+            # if the document exists, ask the user if they want to keep the original or override
+            if set(mol.__dict__.keys()).intersection(set(existing_doc.keys())):
+                # if the keys are the same, check if the values are the same
+                if mol.__dict__ != existing_doc:
+                    # if the values are the same, do nothing
+                    print("Conflict")
+                    conflict_molecules.append(mol)
+                    molecules.remove(mol)
+                    continue
+                else:
+                    print("Exists")
+    return conflict_molecules
+
+def duplicate_error_messages(duplicates):
+    for mol in duplicates:
+        print("Duplicate molecule found: {mol.name} with basis set {mol.basis_sets} and functional {mol.functional}")
+
 def upload_molecules_to_db(molecules):
     for mol in molecules:
         mol.analysis_type = mol.analysis_type.name # change the analysis type to a string, cannot upload object type to database
         toDB = mol.__dict__
         try:
             collection.insert_one(toDB)
+            print("Uploaded molecule to the database for molecule: {mol.name} Analysis type: {mol.analysis_type.name}")
+            print("Identifier: {mol.identifier}")
         except errors.PyMongoError as err:
             raise ConnectionError("Failed to upload molecule to the database for molecule: {mol.name} Analysis type: {mol.analysis_type.name}") from err
 
@@ -180,12 +206,15 @@ if __name__ == "__main__":
     get_analysis_types()
 
     # suffizes as keys and analysis types as values
-    suffixes = get_desired_suffixes() # gets file suffixes for analysis types
+    suffixes = get_desired_suffixes() # gets file suffixes for analysis types (file types in directory that can be parsed)
 
     molecule_files = get_files_from_directory_with_correct_suffixes(directory, suffixes)
 
     # get all the data from the files
     molecules = get_all_molecule_data(molecule_files, name_of_user, suffixes)
+    duplicates = check_for_duplicates(molecules)
+    duplicate_error_messages(duplicates)
+
     upload_molecules_to_db(molecules)
     pass
 
