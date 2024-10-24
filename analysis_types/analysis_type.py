@@ -3,7 +3,6 @@
 
 from matplotlib.pyplot import cla
 from abc import ABC, abstractmethod
-from molecule import Molecule
 
 class Analysis_Type:
 
