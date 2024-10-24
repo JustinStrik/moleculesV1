@@ -159,12 +159,15 @@ def check_for_duplicates(molecules):
                 # if the keys are the same, check if the values are the same
                 if mol.__dict__ != existing_doc:
                     # if the values are the same, do nothing
-                    print("Conflict")
+                    print(f"Conflict: molecule with identifier {mol.identifier} already exists in the database. Upload cancelled.")
                     conflict_molecules.append(mol)
-                    molecules.remove(mol)
-                    continue
+                    # molecules.remove(mol) # can't remove from list while iterating
                 else:
                     print("Exists")
+
+    # remove the molecules that are in conflict
+    molecules = [mol for mol in molecules if mol not in conflict_molecules]
+
     return conflict_molecules, molecules
 
 def duplicate_error_messages(duplicates):
