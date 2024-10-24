@@ -28,12 +28,11 @@ def get_user():
 # create_user_file(username, password, name_of_user)   
 
 def announce_user():
-    from user import username, password, name_of_user
     print("Username: {username}".format(username=username))
     print("Password: {password}".format(password=password))
     print("Name of user: {name_of_user}".format(name_of_user=name_of_user)) 
 
-def connect_to_db():
+def connect_to_db(username, password):
     # connect to the database
     # try, if doesnt work, throw error
     global client
@@ -88,7 +87,8 @@ def get_desired_suffixes():
     # suffixes as keys and analysis types as values
     suffixes = {}
     for type in analysis_types:
-        suffixes[type.suffix] = type
+        # get type with that name
+        suffixes[type.get_suffix()] = type
 
     return suffixes
 
@@ -120,6 +120,11 @@ def get_analysis_types():
     analysis_types = [f for f in os.listdir("analysis_types") if os.path.isfile(os.path.join("analysis_types", f, f + ".py")) and f != "Sample_Analysis"]
 
     # change analysis_types to be a list of objects that are the analysis types from the analysis_types directory
+    # to do that, import the module and get the class from the module
+    for i in range(len(analysis_types)):
+        import_statement = "from analysis_types.{analysis_type}.{analysis_type} import {analysis_type}".format(analysis_type=analysis_types[i])
+        exec(import_statement)
+
     for i in range(len(analysis_types)):
         analysis_types[i] = getattr(getattr(getattr(analysis_types_module, analysis_types[i]), analysis_types[i]), analysis_types[i])()
 
@@ -160,11 +165,12 @@ def check_for_duplicates(molecules):
                     continue
                 else:
                     print("Exists")
-    return conflict_molecules
+    return conflict_molecules, molecules
 
 def duplicate_error_messages(duplicates):
     for mol in duplicates:
-        print("Duplicate molecule found: {mol.name} with basis set {mol.basis_sets} and functional {mol.functional}")
+        # with f strings, the curly braces need to be doubled
+        print(f"Duplicate molecule found: {mol.name} with basis set {mol.basis_sets} and functional {mol.functional}")
 
 def upload_molecules_to_db(molecules):
     for mol in molecules:
@@ -172,10 +178,14 @@ def upload_molecules_to_db(molecules):
         toDB = mol.__dict__
         try:
             collection.insert_one(toDB)
-            print("Uploaded molecule to the database for molecule: {mol.name} Analysis type: {mol.analysis_type.name}")
-            print("Identifier: {mol.identifier}")
+            print(f"Uploaded molecule to the database for molecule: {mol.name} Analysis type: {mol.analysis_type}")
+            print(f"Identifier: {mol.identifier}")
         except errors.PyMongoError as err:
-            raise ConnectionError("Failed to upload molecule to the database for molecule: {mol.name} Analysis type: {mol.analysis_type.name}") from err
+            # raise ConnectionError("Failed to upload molecule to the database for molecule: {name} Analysis type: {analysis_type.name}") from err
+            # print instead
+            print(f"Failed to upload molecule with identifier {mol.identifier} to the database for molecule: {mol.name} Analysis type: {mol.analysis_type}")
+            print("The error was:" + err)
+
 
 def get_all_molecule_data(files_dict, name_of_user, suffixes):
     # files_dict is a dictionary with suffixes as keys and lists of files as values
@@ -197,9 +207,9 @@ def get_all_molecule_data(files_dict, name_of_user, suffixes):
 if __name__ == "__main__":
     # check_user_file() # now asks for input every time
     username, password, name_of_user = get_user()
-    announce_user()
+    # announce_user()
 
-    client = connect_to_db()
+    client = connect_to_db(username, password)
     establish_connection() # gets db and collection
 
     get_analysis_types()
@@ -211,9 +221,25 @@ if __name__ == "__main__":
 
     # get all the data from the files
     molecules = get_all_molecule_data(molecule_files, name_of_user, suffixes)
-    duplicates = check_for_duplicates(molecules)
+    duplicates, molecules = check_for_duplicates(molecules)
     duplicate_error_messages(duplicates)
 
     upload_molecules_to_db(molecules)
     pass
 
+
+# class Analysis_Manager:
+#     def get_all_analysis_types():
+#         # names of subdirectories in the analysis_types directory
+#         # each folder in the current directory is a different analysis type
+#         # under each folder is a python file with the same name as the folder
+#         # the python file contains the analysis type class
+#         # for each folder in the analysis_types directory
+#         for folder in os.listdir("analysis_types"):
+#             # import all those classes
+#             import_statement = "from analysis_types.{folder}.{folder} import {folder}".format(folder=folder)
+#             exec(import_statement)
+#             # get the class from the module
+#             analysis_type = getattr(getattr(getattr(analysis_types_module, folder), folder), folder)
+#             print(analysis_type)
+#             # instantiate the class
