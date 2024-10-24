@@ -22,10 +22,9 @@ class Gaussian(Analysis_Type):
     mol = None # molecule currently being analyzed
     name = 'Gaussian'
 
-    def get_suffix():
+    def get_suffix(self):
         return suffix
     
-    get_suffix = '.log'
     suffix = '.log'
 
     def get_homo_lumo(self): 
