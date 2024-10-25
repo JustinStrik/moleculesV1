@@ -12,7 +12,7 @@ class Type_Example(Analysis_Type):
     
     mol = None # molecule currently being analyzed
     name = 'Type_Example'
-    suffix = '.log' # TODO change to the suffix of the output files
+    suffix = '.log' # TODO change to the suffix of the output files for Type_Example
     data_lines = '' # string containing all the data lines from the file
     lines = [] # all the lines from the file
 
