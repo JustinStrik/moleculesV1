@@ -1,4 +1,5 @@
 # gets data from output files done with Type_Example
+# this template is from Gaussian Analysis
 from analysis_types.analysis_type import Analysis_Type
 import datetime
 
@@ -20,6 +21,8 @@ class Type_Example(Analysis_Type):
 
     def get_homo_lumo(self): 
         # TODO replace with function to get homo and lumo from Type_Example analysis output
+        print(f"get_homo_lumo not implemeneted yet in {self.mol.name}")
+        pass
         linefound = False
 
         # Search for the last line containing "Alpha occ. eigenvalues"
@@ -44,6 +47,9 @@ class Type_Example(Analysis_Type):
 
 
     def get_dipole(self):
+        # TODO replace with function to get dipole from Type_Example analysis output
+        print(f"get_diple not implemeneted yet in {self.mol.name}")
+        pass
         self.mol.dipole_xyz = self.data_lines.split('RMSD=')[1].split('\\')[0]
         # convert to float RMSD=6.613e-05\\
         self.mol.dipole_xyz = float(self.mol.dipole_xyz.split('e')[0]) * 10**float(self.mol.dipole_xyz.split('e')[1])
@@ -55,6 +61,9 @@ class Type_Example(Analysis_Type):
 
     # get whether or not there was an error, read only the bottom 100 lines of the file searching for 'Error termination'
     def get_status(self):
+        # TODO replace with function to get status from Type_Example analysis output
+        print(f"get_status not implemeneted yet in {self.mol.name}") # TODO
+        pass
         for line in self.lines:
             if 'Error termination' in line:
                 status = 'Error'
@@ -65,28 +74,49 @@ class Type_Example(Analysis_Type):
 
     # line looks like  %NProcShared=16
     def get_NPROC(self):
+        # TODO replace with function to get NPROC from Type_Example analysis output
+        print(f"get_diple not implemeneted yet in {self.mol.name}")
+        pass
         for line in self.lines:
             if '%NProcShared=' in line:
                 self.mol.NPROC = float(line.split('=')[1])
                 break
 
     def get_electronic_energy(self):
+        # TODO replace with function to get electronic energy from Type_Example analysis output
+        # or remove function if Analysis_Type does not yield electronic energy
+        print(f"get_diple not implemeneted yet in {self.mol.name}")
+        pass
         # HF=-2623.6082922\
         self.mol.electronic_energy = float(self.data_lines.split('HF=')[1].split('\\')[0]).__round__(5)
 
     # first value is basis set, second is functional
     def get_basis_set(self):
+        # TODO replace with function to get basis set and functional from Type_Example analysis output
+        # or remove function if Analysis_Type does not yield basis set and functional
+        print(f"get_basis_set not implemeneted yet in {self.mol.name}")
+        pass
         # no 'e' (exponent) should be in the basis set
         self.mol.basis_sets = float(self.data_lines.split('Dipole=')[1].split(',')[0])
         self.mol.functional = float(self.data_lines.split('Dipole=')[1].split(',')[1])
         self.mol.stoichiometry = float(self.data_lines.split('Dipole=')[1].split(',')[2].split('\\')[0]) # cut off before //
 
     def get_method(self):
+        # TODO replace with function to get method from Type_Example analysis output
+        # or remove function if Analysis_Type does not yield method
+        print(f"get_method not implemeneted yet in {self.mol.name}")
+        pass
+
         # after FOpt\ but before the next \
         self.mol.functional = self.data_lines.split('FOpt\\')[1].split('\\')[0]
         self.mol.basis_sets = self.data_lines.split('FOpt\\')[1].split('\\')[1]
 
     def get_time(self):
+        # TODO replace with function to get time from Type_Example analysis output
+        # or remove function if Analysis_Type does not yield time
+        print(f"get_time not implemeneted yet in {self.mol.name}")
+        pass
+
         self.mol.time = ''
         # if line contains "elapsed time:"
         for line in self.lines:
@@ -114,6 +144,7 @@ class Type_Example(Analysis_Type):
     def get_data_lines(self):
         # TODO change to the format of the data lines in the output file to that of Type_Example Analysis output
         print('getting data lines not implemented yet for molecule:', self.mol.name)
+        self.data_lines = self.lines
         pass
     
         # data lines start with '1\1\ and end with @, so read all lines between those two
@@ -139,6 +170,7 @@ class Type_Example(Analysis_Type):
 
     def get_opt_xyz(self):
         # TODO change to the format of the opt_xyz in the output file to that of Type_Example Analysis output
+        # or remove function if Analysis_Type does not yield opt_xyz
         print('getting opt_xyz not implemented yet for molecule:', self.mol.name)
         pass
 
@@ -164,6 +196,7 @@ class Type_Example(Analysis_Type):
         
     def get_charges(self):
         # TODO change to the format of the charges in the output file to that of Type_Example Analysis output
+        # or remove function if Analysis_Type does not yield charges
         print('getting charges not implemented yet for molecule:', self.mol.name)
         pass
         found_mulliken, found_hirshfeld = False, False
@@ -215,22 +248,14 @@ class Type_Example(Analysis_Type):
 
         self.mol.identifier = f'{self.mol.name}_{self.mol.basis_sets}_{self.mol.functional}'
 
+    # extract useful data from the file
     def get_data(self, molecule, file_path):
-        # get all files that end with .(suffix) in the database directory
-        # make sure the file name is the same as the path to the file
-        # molecule_files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.suffix')]
-
-        # loop over all log files
-        
 
         with open(file_path, 'r') as mol_file:
             # Read all lines from the file
             self.lines = mol_file.readlines()
             self.mol = molecule
             self.get_data_lines() # optional, could just use whole file, to do that, remove this line and 
-            # self.data_lines = lines
-            
-
 
             # get the name of the file, could be in any directory so just get the last part of the path
             molecule.name = mol_file.name.split('/')[-1].split('.')[0]
@@ -239,6 +264,8 @@ class Type_Example(Analysis_Type):
                 # if there was an error, skip the rest of the file
                 return self.mol
 
+            # run all the functions to get the data
+            # TODO add/remove functions as needed for your data in Type_Example analysis output
             self.get_homo_lumo()
             self.get_NPROC()
             self.get_electronic_energy()
@@ -252,10 +279,3 @@ class Type_Example(Analysis_Type):
             self.make_identifier()
 
             return self.mol
-
-    # # print molecules
-    # for mol in molecules:
-    #     # print all the data for each molecule
-    #     print(self.mol.name, self.mol.status, self.mol.HOMO, self.mol.LUMO, self.mol.GAP, self.mol.NPROC, self.mol.electronic_energy, self.mol.dipole_xyz, self.mol.dipole, self.mol.basis_sets, self.mol.functional, self.mol.stoichiometry, sep=', ')
-
-    #     return molecules
