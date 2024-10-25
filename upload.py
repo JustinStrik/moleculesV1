@@ -5,7 +5,7 @@ import sys
 from pymongo import MongoClient, errors # type: ignore
 from my_mongo_client import connect_to_database
 from molecule import Molecule
-debug_mode = True
+debug_mode = False
 
 # def create_user_file(username, password, name_of_user):
 #     # create the file
@@ -21,8 +21,14 @@ def get_user():
         username = input("Username: ")
         password = input("Password: ")
         name_of_user = input("Name of user: ")
+    # in debug mode, use the user.py file
     else:
-        from user import username, password, name_of_user
+        if not os.path.exists("user.py"):
+            username = input("Username: ")
+            password = input("Password: ")
+            name_of_user = input("Name of user: ")
+        else:        
+            from user import username, password, name_of_user
     return username, password, name_of_user
 
 # create_user_file(username, password, name_of_user)   
@@ -81,16 +87,43 @@ else:
 def get_all_files_from_directory(directory):
     # get all files in the directory
     files = [os.path.join(directory, f) for f in os.listdir(directory)]
+    # change to absolute path
+    files = [os.path.abspath(f) for f in files]
     return files
 
+# returns map of suffixes to an array of analysis types
 def get_desired_suffixes():
     # suffixes as keys and analysis types as values
     suffixes = {}
     for type in analysis_types:
-        # get type with that name
-        suffixes[type.get_suffix()] = type
+        if type.name == "Type_Example":
+            continue
+        # get type with that name, can be more than one type with the same suffix
+        if type.suffix not in suffixes:
+            suffixes[type.suffix] = []
+        
+        suffixes[type.suffix].append(type)
 
+    # returns map of suffixes to an array of analysis types
     return suffixes
+
+def split_suffixes_into_analysis_types(suffixes):
+    # analysis type has function called     def check_if_correct_file_type(self, lines):
+        # TODO change to the test that only the correct file type would pass
+
+        # to ensure the file is the correct type, have it check to see if the file
+        # passes a test that only the correct file type would pass
+        # for example, Gaussian files start with 'Entering Gaussian System'
+        # print(f"check_if_correct_file_type not implemeneted yet in {self.mol.name}")
+        # pass
+
+        # # example for Gaussian"
+        # # check first line for 'Entering Gaussian System'
+        # return 'Entering Gaussian System' in lines[0]
+
+    # for each suffix, check if it is the correct file type
+    pass
+
 
 def get_files_from_directory_with_correct_suffixes(directory, suffixes):
 
@@ -176,6 +209,7 @@ def duplicate_error_messages(duplicates):
         print(f"Duplicate molecule found: {mol.name} with basis set {mol.basis_sets} and functional {mol.functional}")
 
 def upload_molecules_to_db(molecules):
+    failed_molecules = []
     for mol in molecules:
         mol.analysis_type = mol.analysis_type.name # change the analysis type to a string, cannot upload object type to database
         toDB = mol.__dict__
@@ -186,23 +220,36 @@ def upload_molecules_to_db(molecules):
         except errors.PyMongoError as err:
             # raise ConnectionError("Failed to upload molecule to the database for molecule: {name} Analysis type: {analysis_type.name}") from err
             # print instead
+            failed_molecules.append(mol)
             print(f"Failed to upload molecule with identifier {mol.identifier} to the database for molecule: {mol.name} Analysis type: {mol.analysis_type}")
             print("The error was:" + err)
 
+    print("Total successful uploads: {num}".format(num=len(molecules) - len(failed_molecules))) 
+    print("Total failed uploads: {num}".format(num=len(failed_molecules)))
 
 def get_all_molecule_data(files_dict, name_of_user, suffixes):
     # files_dict is a dictionary with suffixes as keys and lists of files as values
     molecules = []
 
     for suffix in files_dict:
+        # file must be absolute path
         for file in files_dict[suffix]:
+
             # molecule = Molecule(name_of_user, analysis_type=suffixes[suffix]) # custom object from molecule.py
 
             # molecule.get_data() # implicit call to get_data method of the analysis type
             # molecules.append(molecule)
-            molecule = Molecule(name_of_user, suffixes[suffix])
-            molecule.get_data(file)
-            molecules.append(molecule)
+
+            # if suffix size is >1, check to see which analysis type it is
+            if len(suffixes[suffix]) > 1:
+                for analysis_type in suffixes[suffix]:
+                    if analysis_type.check_if_correct_file_type(file):
+                        molecule = Molecule(name_of_user, analysis_type, file)
+                        molecules.append(molecule)
+                        break
+            else:
+                molecule = Molecule(name_of_user, suffixes[suffix], file)
+                molecules.append(molecule)
 
     return molecules
 
