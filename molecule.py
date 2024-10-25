@@ -35,6 +35,11 @@ class Molecule:
         self.uploader = uploader
         self.analysis_type = analysis_type
 
+    def __init__(self, uploader, analysis_type, file_path) -> None:
+        self.uploader = uploader
+        self.analysis_type = analysis_type
+        self.get_data(file_path)
+
     def get_data(self, file_path):
         if hasattr(self.analysis_type, 'get_data'):
             return self.analysis_type.get_data(self, file_path)
