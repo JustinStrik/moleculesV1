@@ -52,6 +52,10 @@ class Analysis_Type:
         pass
 
     @abstractmethod
+    def get_data(self):
+        pass
+
+    @abstractmethod
     def get_status(self):
         pass
 
