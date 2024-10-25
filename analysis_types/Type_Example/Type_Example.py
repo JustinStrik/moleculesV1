@@ -19,7 +19,7 @@ class Type_Example(Analysis_Type):
     def get_suffix(self):
         return self.suffix
     
-    def check_if_correct_file_type(self, lines):
+    def check_if_correct_file_type(self, file_path):
         # TODO change to the test that only the correct file type would pass
 
         # to ensure the file is the correct type, have it check to see if the file
@@ -29,8 +29,11 @@ class Type_Example(Analysis_Type):
         pass
 
         # example for Gaussian"
-        # check first line for 'Entering Gaussian System'
-        return 'Entering Gaussian System' in lines[0]
+        
+        # get the first line of the file
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+            return 'Entering Gaussian System' in lines[0]
     
         # TODO example for Type_Example
         # could also check for 'Type_Example' first many lines

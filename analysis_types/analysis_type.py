@@ -19,6 +19,10 @@ class Analysis_Type:
     # difficult to parse, use this to get only the lines
 
     @abstractmethod
+    def check_if_correct_file_type(self, file_name):
+        pass
+    
+    @abstractmethod
     def get_electronic_energy(self):
         pass
 

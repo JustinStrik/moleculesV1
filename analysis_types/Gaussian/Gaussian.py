@@ -26,11 +26,14 @@ class Gaussian(Analysis_Type):
     def get_suffix(self):
         return suffix
     
-    def check_if_correct_file_type(self, lines):
+    def check_if_correct_file_type(self, file):
         # to ensure the file is the correct type, have it check to see if the file
         # passes a test that only the correct file type would pass
 
-        return 'Entering Gaussian System' in lines[0]
+        # get the first line of the file
+        with open(file, 'r') as f:
+            lines = f.readlines()
+            return 'Entering Gaussian System' in lines[0]
     
     def get_homo_lumo(self): 
         linefound = False
