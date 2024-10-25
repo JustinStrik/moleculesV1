@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
-import my_mongo_client
+from my_mongo_client_getter import get_my_mongo_client
+get_my_mongo_client() # this will copy my_mongo_client.py from the above directory if it does not exist in the current directory
+from my_mongo_client import connect_to_database
 
 # def create_user_file(username, password, name_of_user):
 #     # create the file
@@ -21,7 +23,7 @@ print("Password: {password}".format(password=password))
 print("Name of user: {name_of_user}".format(name_of_user=name_of_user))
 
 # connect to the database
-cluster = my_mongo_client.connect_to_database(username, password)
+cluster = connect_to_database(username, password)
 
 db = cluster["Main"]
 collection = db["XYZfromSite"]

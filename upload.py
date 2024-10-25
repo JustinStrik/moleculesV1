@@ -2,23 +2,16 @@ from math import log
 import os
 import re
 import sys
-from pymongo import MongoClient, errors # type: ignore
+from pymongo import MongoClient, errors
+from sympy import im # type: ignore
 # from my_mongo_client import connect_to_database
 
 # write code for if no my_mongo_client.py file exists get one from above directory
 # if to see if my_mongo_client.py exists, if not, read it from above directory
-file_absolutepath = os.path.abspath(__file__)
-file_directory = os.path.dirname(file_absolutepath)
-
-# check if my_mongo_client.py exists in the current directory
-if not os.path.exists(os.path.join(file_directory, "my_mongo_client.py")):
-    # if it does not exist, copy it from the above directory
-    import shutil
-    shutil.copyfile(os.path.join(file_directory, "..", "my_mongo_client.py"), os.path.join(file_directory, "my_mongo_client.py"))
-    print("Copied my_mongo_client.py from above directory")
-
+from my_mongo_client_getter import get_my_mongo_client
+get_my_mongo_client() # this will copy my_mongo_client.py from the above directory if it does not exist in the current directory
 from my_mongo_client import connect_to_database
-from molecule import Molecule
+
 debug_mode = True
 
 # def create_user_file(username, password, name_of_user):
