@@ -21,12 +21,17 @@ class Gaussian(Analysis_Type):
     
     mol = None # molecule currently being analyzed
     name = 'Gaussian'
+    suffix = '.log'
 
     def get_suffix(self):
         return suffix
     
-    suffix = '.log'
+    def check_if_correct_file_type(self, lines):
+        # to ensure the file is the correct type, have it check to see if the file
+        # passes a test that only the correct file type would pass
 
+        return 'Entering Gaussian System' in lines[0]
+    
     def get_homo_lumo(self): 
         linefound = False
 
