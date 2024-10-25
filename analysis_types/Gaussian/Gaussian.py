@@ -216,7 +216,7 @@ class Gaussian(Analysis_Type):
         # doc_id = f'{molecule["name"]}_{molecule["basis_sets"]}_{molecule["functional"]}'
         self.mol.identifier = f'{self.mol.name}_{self.mol.basis_sets}_{self.mol.functional}'
 
-    def get_data(self, molecule, file_path):
+    def get_data(self, mol, file_path):
         # get all files that end with .log in the database directory
         # make sure the logfile name is the same as the path to the file
         # logfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.log')]
@@ -228,15 +228,15 @@ class Gaussian(Analysis_Type):
             # Read all lines from the file
             global lines
             lines = mol_file.readlines()
-            self.mol = molecule
+            self.mol = mol
             dataLines = ''
             self.get_data_lines()
 
 
             # get the name of the file, could be in any directory so just get the last part of the path
-            molecule.name = mol_file.name.split('/')[-1].split('.')[0]
+            self.mol.name = mol_file.name.split('/')[-1].split('.')[0]
             self.get_status()
-            if molecule.status == 'Error':
+            if self.mol.status == 'Error':
                 # if there was an error, skip the rest of the file
                 return self.mol
 
