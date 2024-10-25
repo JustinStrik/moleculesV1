@@ -5,7 +5,7 @@ import sys
 from pymongo import MongoClient, errors # type: ignore
 from my_mongo_client import connect_to_database
 from molecule import Molecule
-debug_mode = False
+debug_mode = True
 
 # def create_user_file(username, password, name_of_user):
 #     # create the file
@@ -149,15 +149,17 @@ def get_analysis_types():
     global analysis_types
     # analysis_types = [f for f in os.listdir("analysis_types") if os.path.isdir(os.path.join("analysis_types", f))]
     # include if the file is a python file, was originally just the directory and getting __pycache__ as well
-    # except for the Sample_Analysis folder
-    analysis_types = [f for f in os.listdir("analysis_types") if os.path.isfile(os.path.join("analysis_types", f, f + ".py")) and f != "Sample_Analysis"]
 
+    # change to relative to the current running directory
+    current_directory = os.path.dirname(os.path.realpath(__file__))
+    analysis_types = [f for f in os.listdir(os.path.join(current_directory, "analysis_types")) if os.path.isfile(os.path.join(current_directory, "analysis_types", f, f + ".py")) and f != "Type_Example"]
     # change analysis_types to be a list of objects that are the analysis types from the analysis_types directory
     # to do that, import the module and get the class from the module
     for i in range(len(analysis_types)):
         import_statement = "from analysis_types.{analysis_type}.{analysis_type} import {analysis_type}".format(analysis_type=analysis_types[i])
         exec(import_statement)
 
+    # replace the string with the object
     for i in range(len(analysis_types)):
         analysis_types[i] = getattr(getattr(getattr(analysis_types_module, analysis_types[i]), analysis_types[i]), analysis_types[i])()
 
