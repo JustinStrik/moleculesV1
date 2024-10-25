@@ -1,7 +1,6 @@
 # Analysis class for the analysis types
 # analysis types will extend this class
 
-from matplotlib.pyplot import cla
 from abc import ABC, abstractmethod
 
 class Analysis_Type:
