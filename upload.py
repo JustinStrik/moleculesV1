@@ -3,6 +3,20 @@ import os
 import re
 import sys
 from pymongo import MongoClient, errors # type: ignore
+# from my_mongo_client import connect_to_database
+
+# write code for if no my_mongo_client.py file exists get one from above directory
+# if to see if my_mongo_client.py exists, if not, read it from above directory
+file_absolutepath = os.path.abspath(__file__)
+file_directory = os.path.dirname(file_absolutepath)
+
+# check if my_mongo_client.py exists in the current directory
+if not os.path.exists(os.path.join(file_directory, "my_mongo_client.py")):
+    # if it does not exist, copy it from the above directory
+    import shutil
+    shutil.copyfile(os.path.join(file_directory, "..", "my_mongo_client.py"), os.path.join(file_directory, "my_mongo_client.py"))
+    print("Copied my_mongo_client.py from above directory")
+
 from my_mongo_client import connect_to_database
 from molecule import Molecule
 debug_mode = True
@@ -196,7 +210,7 @@ def check_for_duplicates(molecules):
         if mol.status == "Error":
             if mol.identifier == "":
                 mol.identifier = f'{mol.name}_{mol.basis_sets}_{mol.functional}'
-                
+
         existing_doc = collection.find_one({"identifier": mol.identifier})
         if existing_doc:
             # if the document exists, ask the user if they want to keep the original or override
