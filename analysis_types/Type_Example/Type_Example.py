@@ -18,6 +18,27 @@ class Type_Example(Analysis_Type):
 
     def get_suffix(self):
         return self.suffix
+    
+    def check_if_correct_file_type(self, lines):
+        # TODO change to the test that only the correct file type would pass
+
+        # to ensure the file is the correct type, have it check to see if the file
+        # passes a test that only the correct file type would pass
+        # for example, Gaussian files start with 'Entering Gaussian System'
+        print(f"check_if_correct_file_type not implemeneted yet in {self.mol.name}")
+        pass
+
+        # example for Gaussian"
+        # check first line for 'Entering Gaussian System'
+        return 'Entering Gaussian System' in lines[0]
+    
+        # TODO example for Type_Example
+        # could also check for 'Type_Example' first many lines
+        # whatever is unique to the Type_Example output file
+        for line in lines:
+            if 'Entering Type_Example System' in line:
+                return True
+
 
     def get_homo_lumo(self): 
         # TODO replace with function to get homo and lumo from Type_Example analysis output
