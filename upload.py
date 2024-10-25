@@ -251,7 +251,7 @@ def get_all_molecule_data(files_dict, name_of_user, suffixes):
             if len(suffixes[suffix]) > 1:
                 for analysis_type in suffixes[suffix]:
                     if analysis_type.check_if_correct_file_type(file):
-                        molecule = Molecule(name_of_user, analysis_type, file)
+                        molecule = Molecule(name_of_user, analysis_type, file) # calls get_data in constructor
                         molecules.append(molecule)
                         break
             else:
@@ -283,7 +283,6 @@ if __name__ == "__main__":
     duplicate_error_messages(duplicates)
 
     upload_molecules_to_db(molecules)
-    pass
 
 
 # class Analysis_Manager:
