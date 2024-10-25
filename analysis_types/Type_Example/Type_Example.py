@@ -12,6 +12,8 @@ class Type_Example(Analysis_Type):
     mol = None # molecule currently being analyzed
     name = 'Type_Example'
     suffix = '.log' # TODO change to the suffix of the output files
+    data_lines = '' # string containing all the data lines from the file
+    lines = [] # all the lines from the file
 
     def get_suffix(self):
         return self.suffix
@@ -21,10 +23,10 @@ class Type_Example(Analysis_Type):
         linefound = False
 
         # Search for the last line containing "Alpha occ. eigenvalues"
-        for line in reversed(lines):
+        for line in reversed(self.lines):
             if linefound:
                 # return to two lines before the line containing "Alpha occ. eigenvalues"
-                line = lines[lines.index(line) + 2]
+                line = self.lines[self.lines.index(line) + 2]
                 values = line.split()[4:]
                 # values[0] to float, not string
                 self.mol.LUMO = float(values[0])
@@ -42,18 +44,18 @@ class Type_Example(Analysis_Type):
 
 
     def get_dipole(self):
-        self.mol.dipole_xyz = data_lines.split('RMSD=')[1].split('\\')[0]
+        self.mol.dipole_xyz = self.data_lines.split('RMSD=')[1].split('\\')[0]
         # convert to float RMSD=6.613e-05\\
         self.mol.dipole_xyz = float(self.mol.dipole_xyz.split('e')[0]) * 10**float(self.mol.dipole_xyz.split('e')[1])
 
-        self.mol.dipole = data_lines.split('RMSF=')[1].split('\\')[0]
+        self.mol.dipole = self.data_lines.split('RMSF=')[1].split('\\')[0]
         self.mol.dipole = float(self.mol.dipole.split('e')[0]) * 10**float(self.mol.dipole.split('e')[1])
 
 
 
     # get whether or not there was an error, read only the bottom 100 lines of the file searching for 'Error termination'
     def get_status(self):
-        for line in lines:
+        for line in self.lines:
             if 'Error termination' in line:
                 status = 'Error'
                 break
@@ -63,31 +65,31 @@ class Type_Example(Analysis_Type):
 
     # line looks like  %NProcShared=16
     def get_NPROC(self):
-        for line in lines:
+        for line in self.lines:
             if '%NProcShared=' in line:
                 self.mol.NPROC = float(line.split('=')[1])
                 break
 
     def get_electronic_energy(self):
         # HF=-2623.6082922\
-        self.mol.electronic_energy = float(data_lines.split('HF=')[1].split('\\')[0]).__round__(5)
+        self.mol.electronic_energy = float(self.data_lines.split('HF=')[1].split('\\')[0]).__round__(5)
 
     # first value is basis set, second is functional
     def get_basis_set(self):
         # no 'e' (exponent) should be in the basis set
-        self.mol.basis_sets = float(data_lines.split('Dipole=')[1].split(',')[0])
-        self.mol.functional = float(data_lines.split('Dipole=')[1].split(',')[1])
-        self.mol.stoichiometry = float(data_lines.split('Dipole=')[1].split(',')[2].split('\\')[0]) # cut off before //
+        self.mol.basis_sets = float(self.data_lines.split('Dipole=')[1].split(',')[0])
+        self.mol.functional = float(self.data_lines.split('Dipole=')[1].split(',')[1])
+        self.mol.stoichiometry = float(self.data_lines.split('Dipole=')[1].split(',')[2].split('\\')[0]) # cut off before //
 
     def get_method(self):
         # after FOpt\ but before the next \
-        self.mol.functional = data_lines.split('FOpt\\')[1].split('\\')[0]
-        self.mol.basis_sets = data_lines.split('FOpt\\')[1].split('\\')[1]
+        self.mol.functional = self.data_lines.split('FOpt\\')[1].split('\\')[0]
+        self.mol.basis_sets = self.data_lines.split('FOpt\\')[1].split('\\')[1]
 
     def get_time(self):
         self.mol.time = ''
         # if line contains "elapsed time:"
-        for line in lines:
+        for line in self.lines:
             if 'Job cpu time:' in line:
                 # get the time
                 time_data = line.split('Job cpu time:       ')[1].split(' ')
@@ -110,19 +112,25 @@ class Type_Example(Analysis_Type):
                 break
 
     def get_data_lines(self):
+        # TODO change to the format of the data lines in the output file to that of Type_Example Analysis output
+        print('getting data lines not implemented yet for molecule:', self.mol.name)
+        pass
+    
         # data lines start with '1\1\ and end with @, so read all lines between those two
         # and add it to one string
-        global data_lines
-        data_lines = ''
+        # data lines are lines with the main data we are concerned with
+        # this is used to reduce the number of times we have to loop over the file
+        # it is optional, but recommended for large files
+        self.data_lines = ''
         dataStart = False
-        for line in lines:
+        for line in self.lines:
             if '1\\1\\' in line or dataStart:
                 dataStart = True
-                data_lines += line
+                self.data_lines += line
                 if '@' in line:
                     # remove all the \n from the string
-                    data_lines = data_lines.replace('\n', '')
-                    data_lines = data_lines.replace(' ', '')
+                    self.data_lines = self.data_lines.replace('\n', '')
+                    self.data_lines = self.data_lines.replace(' ', '')
                     break   
 
     def get_upload_date_and_time(self):
@@ -130,7 +138,11 @@ class Type_Example(Analysis_Type):
         self.mol.upload_time = datetime.datetime.now().strftime("%H:%M:%S") 
 
     def get_opt_xyz(self):
-        xyz_data = data_lines.split('\\\\')[3]
+        # TODO change to the format of the opt_xyz in the output file to that of Type_Example Analysis output
+        print('getting opt_xyz not implemented yet for molecule:', self.mol.name)
+        pass
+
+        xyz_data = self.data_lines.split('\\\\')[3]
         # read and ignore (pop) first 4 characters
         xyz_data = xyz_data.split('\\')
         self.mol.total_charge = int(xyz_data[0].split(',')[0])
@@ -151,10 +163,13 @@ class Type_Example(Analysis_Type):
 
         
     def get_charges(self):
+        # TODO change to the format of the charges in the output file to that of Type_Example Analysis output
+        print('getting charges not implemented yet for molecule:', self.mol.name)
+        pass
         found_mulliken, found_hirshfeld = False, False
 
         # reverse iterate over lines
-        for line in reversed(lines):
+        for line in reversed(self.lines):
             if (found_hirshfeld and found_mulliken):
                 return
             
@@ -165,7 +180,7 @@ class Type_Example(Analysis_Type):
                 # only intterested in the last value in the line (charge)
 
                 atom_index = 0
-                for chargeline in lines[lines.index(line) + 2:]:
+                for chargeline in self.lines[self.lines.index(line) + 2:]:
                     values = chargeline.split()
                     if values == []:
                         break
@@ -183,7 +198,7 @@ class Type_Example(Analysis_Type):
                 found_hirshfeld = True
                 atom_index = 0
 
-                for chargeline in lines[lines.index(line) + 2:]:
+                for chargeline in self.lines[self.lines.index(line) + 2:]:
                     # break if line is empty or we have reached the end of the opt_xyz dictionary
                     if chargeline == ' \n' or atom_index >= len(self.mol.opt_xyz):
                         break
@@ -195,24 +210,26 @@ class Type_Example(Analysis_Type):
                     atom_index += 1 # will break if we access the value before the last
 
     def make_identifier(self):
-        # doc_id = f'{molecule["name"]}_{molecule["basis_sets"]}_{molecule["functional"]}'
+        # TODO only if molecule analysis does not have basis_sets and functional
+        # bring up to database administrator to create a standard for new identifier tag for the molecule
+
         self.mol.identifier = f'{self.mol.name}_{self.mol.basis_sets}_{self.mol.functional}'
 
     def get_data(self, molecule, file_path):
-        # get all files that end with .log in the database directory
-        # make sure the logfile name is the same as the path to the file
-        # logfiles = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.log')]
+        # get all files that end with .(suffix) in the database directory
+        # make sure the file name is the same as the path to the file
+        # molecule_files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.suffix')]
 
         # loop over all log files
         
 
         with open(file_path, 'r') as mol_file:
             # Read all lines from the file
-            global lines
-            lines = mol_file.readlines()
+            self.lines = mol_file.readlines()
             self.mol = molecule
-            dataLines = ''
-            self.get_data_lines()
+            self.get_data_lines() # optional, could just use whole file, to do that, remove this line and 
+            # self.data_lines = lines
+            
 
 
             # get the name of the file, could be in any directory so just get the last part of the path
