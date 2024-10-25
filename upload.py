@@ -193,6 +193,10 @@ def check_for_duplicates(molecules):
     conflict_molecules = []
     for mol in molecules:
         # doc_id = f'{mol.name}_{mol.basis_sets}_{mol.functional}'
+        if mol.status == "Error":
+            if mol.identifier == "":
+                mol.identifier = f'{mol.name}_{mol.basis_sets}_{mol.functional}'
+                
         existing_doc = collection.find_one({"identifier": mol.identifier})
         if existing_doc:
             # if the document exists, ask the user if they want to keep the original or override
