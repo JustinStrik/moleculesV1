@@ -41,9 +41,10 @@ class Molecule:
         self.analysis_type = analysis_type
         self.get_data(file_path)
 
+    # runs proper get_data given analysis type
     def get_data(self, file_path):
         if hasattr(self.analysis_type, 'get_data'):
-            return self.analysis_type.get_data(self, file_path)
+            self.analysis_type.get_data(self, file_path) # adds info to mol
         else:
             if (self.analysis_type == None):
                 raise AttributeError(f"Molecule {self.name} does not have an analysis type, somehow.")
