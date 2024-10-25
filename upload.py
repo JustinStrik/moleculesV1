@@ -127,22 +127,22 @@ def get_desired_suffixes():
     # returns map of suffixes to an array of analysis types
     return suffixes
 
-def split_suffixes_into_analysis_types(suffixes):
-    # analysis type has function called     def check_if_correct_file_type(self, lines):
-        # TODO change to the test that only the correct file type would pass
+# def split_suffixes_into_analysis_types(suffixes):
+#     # analysis type has function called     def check_if_correct_file_type(self, lines):
+#         # TODO change to the test that only the correct file type would pass
 
-        # to ensure the file is the correct type, have it check to see if the file
-        # passes a test that only the correct file type would pass
-        # for example, Gaussian files start with 'Entering Gaussian System'
-        # print(f"check_if_correct_file_type not implemeneted yet in {self.mol.name}")
-        # pass
+#         # to ensure the file is the correct type, have it check to see if the file
+#         # passes a test that only the correct file type would pass
+#         # for example, Gaussian files start with 'Entering Gaussian System'
+#         # print(f"check_if_correct_file_type not implemeneted yet in {self.mol.name}")
+#         # pass
 
-        # # example for Gaussian"
-        # # check first line for 'Entering Gaussian System'
-        # return 'Entering Gaussian System' in lines[0]
+#         # # example for Gaussian"
+#         # # check first line for 'Entering Gaussian System'
+#         # return 'Entering Gaussian System' in lines[0]
 
-    # for each suffix, check if it is the correct file type
-    pass
+#     # for each suffix, check if it is the correct file type
+#     pass
 
 
 def get_files_from_directory_with_correct_suffixes(directory, suffixes):
@@ -182,25 +182,6 @@ def get_analysis_types():
     # replace the string with the object
     for i in range(len(analysis_types)):
         analysis_types[i] = getattr(getattr(getattr(analysis_types_module, analysis_types[i]), analysis_types[i]), analysis_types[i])()
-
-# # print all the log files
-# print("Log files:")
-# for logfile in logfiles:
-#     print(logfile)
-
-# # print all the out files
-# print("Out files:")
-# for outfile in outfiles:
-#     print(outfile)
-
-# array of molecules to upload
-# molecules = get_data(logfiles)
-
-# mol_orca = get_orca_data(outfiles)
-
-# change all molecules.uploader to name_of_user in just one line
-# for mol in molecules:
-#     mol.uploader = name_of_user
 
 # checks to see if mol.identifier is already in the database
 def check_for_duplicates(molecules):
