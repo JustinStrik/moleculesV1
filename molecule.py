@@ -27,6 +27,7 @@ class Molecule:
     total_charge = 0
     # Mulliken = ""
     NBO = ""
+    identifier = ""
 
     def __init__(self) -> None:
         pass
