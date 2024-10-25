@@ -66,23 +66,29 @@ def establish_connection():
     collection = db["molecules"]
 
 
-if not debug_mode:
-    if (len(sys.argv) > 1):
-        # if the user passed in a directory, use that directory
-        directory = sys.argv[1]
+def get_directory():
+    if not debug_mode:
+        if (len(sys.argv) > 1):
+            # if the user passed in a directory, use that directory
+            directory = sys.argv[1]
+        else:
+            # prompt user for directory
+            directory = input("Enter the FULL PATH directory of the desired files (LEAVE BLANK for current directory): ")
     else:
-        # prompt user for directory
-        directory = input("Enter the directory of the log files (blank for current directory): ")
-else:
-    directory = ""
+        if (len(sys.argv) > 1):
+            # if the user passed in a directory, use that directory
+            directory = sys.argv[1]
+        else:
+            directory = ""
 
-# reformat directory to be compatible with os.path.join
-directory = directory.replace('\\', '/')
-if directory != "":
-    print("Directory: {directory}".format(directory=directory))
-else:
-    print("Directory: current directory")
-    directory = "." # current directory notation to be used in os.path.join
+    # reformat directory to be compatible with os.path.join
+    directory = directory.replace('\\', '/')
+    if directory != "":
+        print("Directory: {directory}".format(directory=directory))
+    else:
+        print("Directory: current directory")
+        directory = "." # current directory notation to be used in os.path.join
+    return directory
 
 def get_all_files_from_directory(directory):
     # get all files in the directory
@@ -250,7 +256,7 @@ def get_all_molecule_data(files_dict, name_of_user, suffixes):
                         molecules.append(molecule)
                         break
             else:
-                molecule = Molecule(name_of_user, suffixes[suffix], file)
+                molecule = Molecule(name_of_user, suffixes[suffix][0], file) # for first element in the list, only one element
                 molecules.append(molecule)
 
     return molecules
@@ -269,6 +275,7 @@ if __name__ == "__main__":
     # suffizes as keys and analysis types as values
     suffixes = get_desired_suffixes() # gets file suffixes for analysis types (file types in directory that can be parsed)
 
+    directory = get_directory()
     molecule_files = get_files_from_directory_with_correct_suffixes(directory, suffixes)
 
     # get all the data from the files
